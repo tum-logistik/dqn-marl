@@ -18,7 +18,7 @@ l3 = 100
 l4 = 101 # 4
 
 mem_size = 1000
-batch_size = 3
+batch_size = 50
 replay = deque(maxlen=mem_size)
 
 epochs = 5000
