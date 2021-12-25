@@ -3,7 +3,7 @@ import numpy as np
 class MarketEnv():
 
     def __init__(self):
-        self.max_inventory = 250
+        self.max_inventory = 2500
         self.state_env_dim = 2
         
         self.inventory = self.max_inventory
