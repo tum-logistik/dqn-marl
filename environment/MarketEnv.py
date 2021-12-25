@@ -35,7 +35,8 @@ class MarketEnv():
         demand = np.floor(np.random.poisson(demand_lambda))
         set_price = self.action_space[action_index]
 
-        reward = ((previous_ref_price + set_price)/2) * demand
+        # reward = ((previous_ref_price + set_price)/2) * demand
+        reward = previous_ref_price * demand
         self.current_state[0] = self.current_state[0] - demand
 
         inventory = self.current_state[0] 
