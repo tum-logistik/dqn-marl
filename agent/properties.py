@@ -7,13 +7,13 @@ from matplotlib import pylab as plt
 from collections import deque
 import copy
 
-l1 = 64
+l1 = 2 # 64
 l2 = 150
 l3 = 100
-l4 = 4
+l4 = 101 # 4
 
 mem_size = 1000
-batch_size = 200
+batch_size = 3
 replay = deque(maxlen=mem_size)
 
 epochs = 5000
