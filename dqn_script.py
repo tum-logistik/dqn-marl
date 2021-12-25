@@ -56,11 +56,11 @@ for i in range(epochs):
             minibatch = random.sample(replay, batch_size)
 
             # Could be replaced with pytorch gather
-            state1_batch = torch.cat([s1 for (s1,a,r,s2,d) in minibatch]).view(batch_size, l1)
-            action_batch = torch.tensor([a for (s1,a,r,s2,d) in minibatch]).to(device = devid).type(torch.FloatTensor)
-            reward_batch = torch.tensor([r for (s1,a,r,s2,d) in minibatch]).to(device = devid).type(torch.FloatTensor)
-            state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(batch_size, l1)
-            done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch]).to(device = devid).type(torch.FloatTensor)
+            state1_batch = torch.cat([s1 for (s1,a,r,s2,d) in minibatch]).view(batch_size, l1).to(device = devid)
+            action_batch = torch.tensor([a for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+            reward_batch = torch.tensor([r for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+            state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(batch_size, l1).to(device = devid)
+            done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
 
             # Q update
             Q1 = model(state1_batch).to(device = devid)
