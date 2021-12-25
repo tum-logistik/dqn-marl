@@ -10,11 +10,6 @@ from environment.MarketEnv import MarketEnv
 
 from agent.properties import *
 
-if torch.cuda.is_available():
-    devid = torch.device('cuda:0')
-else:
-    devid = torch.device('cpu')
-
 for i in range(epochs):
     
     # numpy representation of initial state , reset

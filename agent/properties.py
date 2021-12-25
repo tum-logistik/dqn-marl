@@ -7,6 +7,11 @@ from matplotlib import pylab as plt
 from collections import deque
 import copy
 
+if torch.cuda.is_available():
+    devid = torch.device('cuda:0')
+else:
+    devid = torch.device('cpu')
+
 l1 = 2 # 64
 l2 = 150
 l3 = 100
@@ -30,7 +35,7 @@ model = torch.nn.Sequential(
     torch.nn.Linear(l2, l3),
     torch.nn.ReLU(),
     torch.nn.Linear(l3,l4)
-)
+).to(device = devid)
 
 model2 = copy.deepcopy(model) #A
 model2.load_state_dict(model.state_dict()) #B|
