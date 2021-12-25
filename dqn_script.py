@@ -10,6 +10,11 @@ from environment.MarketEnv import MarketEnv
 
 from agent.properties import *
 
+if torch.cuda.is_available():
+    devid = torch.device('cuda:0')
+else:
+    devid = torch.device('cpu')
+
 for i in range(epochs):
     
     # numpy representation of initial state , reset
@@ -19,15 +24,20 @@ for i in range(epochs):
     # rendered_game_boad_1 = game.board.render_np()
     state1_ = marketEnv.reset()
     # state1_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
-
-    state1 = torch.from_numpy(state1_).float()
+    state1 = torch.from_numpy(state1_).float().to(device = devid)
+        
     status = 1
     mov = 0
     while(status == 1): 
         j+=1
         mov += 1
         qval = model(state1)
-        qval_ = qval.data.numpy()
+        
+        if not torch.cuda.is_available():
+            qval_ = qval.data.numpy()
+        else:
+            qval_ = qval.data.cpu().numpy()
+        
         if (random.random() < epsilon):
             action_ = np.random.randint(0,4)
         else:
@@ -84,13 +94,3 @@ plt.figure(figsize=(10,7))
 plt.plot(losses)
 plt.xlabel("Epochs",fontsize=22)
 plt.ylabel("Loss",fontsize=22)
-
-# max_games = 1000
-# wins = 0
-# for i in range(max_games):
-#     win = test_model(model, mode='random', display=False)
-#     if win:
-#         wins += 1
-# win_perc = float(wins) / float(max_games)
-# print("Games played: {0}, # of wins: {1}".format(max_games,wins))
-# print("Win percentage: {}%".format(100.0*win_perc))
