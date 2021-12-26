@@ -14,8 +14,8 @@ from dqn_net import DQNNet
 STATE_DIM = 64 # GW
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = 4) # GW
 
-model2 = copy.deepcopy(DQNModel.model)
-model2.load_state_dict(DQNModel.model.state_dict())
+target_net = copy.deepcopy(DQNModel.model)
+target_net.load_state_dict(DQNModel.model.state_dict())
 
 for i in range(epochs):
     # marketEnv = MarketEnv()
@@ -45,21 +45,10 @@ for i in range(epochs):
         else:
             action_ = np.argmax(qval_)
         
-        # action = action_
-        
         # Execute action and upate state, and get reward + boolTerminal
+        # action = action_
         # marketEnv.step(action)
         # state2_, reward, done, info_dic = marketEnv.step(action)
-        
-        # action = game.action_set[action_]
-        # game.makeMove(action)
-        # print(action)
-        # rendered_game_boad_2 = game.board.render_np()
-        # state2_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
-        # state2 = torch.from_numpy(state2_).float().to(device = devid)
-        # reward = game.reward()
-        # done = True if reward > 0 else False
-        # exp =  (state1, action_, reward, state2, done)
 
         reward, state2, done = game.step(action_)
         exp = (state1, action_, reward, state2, done)
@@ -70,21 +59,24 @@ for i in range(epochs):
         if len(replay) > batch_size:
             minibatch = random.sample(replay, batch_size)
 
-            # Could be replaced with pytorch gather
-            state1_batch = torch.cat([s1 for (s1,a,r,s2,d) in minibatch]).view(batch_size, STATE_DIM).to(device = devid)
-            action_batch = torch.tensor([a for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
-            reward_batch = torch.tensor([r for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
-            state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(batch_size, STATE_DIM).to(device = devid)
-            done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+            # # Could be replaced with pytorch gather
+            # state1_batch = torch.cat([s1 for (s1,a,r,s2,d) in minibatch]).view(batch_size, STATE_DIM).to(device = devid)
+            # action_batch = torch.tensor([a for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+            # reward_batch = torch.tensor([r for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+            # state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(batch_size, STATE_DIM).to(device = devid)
+            # done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
 
-            # Q update
-            Q1 = DQNModel(state1_batch).to(device = devid)
-            with torch.no_grad():
-                Q2 = model2(state2_batch).to(device = devid) #B
+            # # Q update
+            # Q1 = DQNModel(state1_batch).to(device = devid)
+            # with torch.no_grad():
+            #     Q2 = target_net(state2_batch).to(device = devid) #B
             
-            Y = reward_batch + gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
-            X = Q1.gather(dim=1,index=action_batch.long().unsqueeze(dim=1)).squeeze()
-            loss = loss_fn(X, Y.detach())
+            # Y = reward_batch + gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
+            # X = Q1.gather(dim=1,index=action_batch.long().unsqueeze(dim=1)).squeeze()
+            # loss = loss_fn(X, Y.detach())
+
+            Q1, Q2, X, Y, loss = DQNModel.batch_update(minibatch, target_net, STATE_DIM)
+
             print(i, loss.item())
             clear_output(wait=True)
             
@@ -94,7 +86,7 @@ for i in range(epochs):
             DQNModel.optimizer.step()
             
             if j % sync_freq == 0: #C
-                model2.load_state_dict(DQNModel.model.state_dict())
+                target_net.load_state_dict(DQNModel.model.state_dict())
         if done or mov > max_moves:
             status = 0
             mov = 0
