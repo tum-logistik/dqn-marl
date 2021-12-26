@@ -11,7 +11,7 @@ from common.properties import *
 from dqn_net import DQNNet
 
 STATE_DIM = 2
-ACTION_DIM = 401
+ACTION_DIM = 51
 
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
