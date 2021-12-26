@@ -22,7 +22,7 @@ def run_dqn(DQNModel):
     target_net.load_state_dict(DQNModel.model.state_dict())
 
     episode_rewards = []
-    epoch_rewards = []
+    avg_epoch_rewards = []
     j = 0
 
     for i in range(epochs):
@@ -38,7 +38,6 @@ def run_dqn(DQNModel):
             j+=1
             mov += 1
             
-
             qval = DQNModel(state1)
             
             if not torch.cuda.is_available():
@@ -53,7 +52,7 @@ def run_dqn(DQNModel):
             
             # Execute action and upate state, and get reward + boolTerminal
             action = action_ind
-            print(action)
+            
             
             marketEnv.step(action)
             state2_, reward, done, info_dic = marketEnv.step(action)
@@ -64,6 +63,9 @@ def run_dqn(DQNModel):
             state1 = state2
             
             rewards.append(reward)
+
+            # print out
+            print(action)
             print(reward)
             
             if len(replay) > batch_size:
@@ -90,9 +92,9 @@ def run_dqn(DQNModel):
                 status = 0
                 mov = 0
                 
-        epoch_rewards.append(np.mean(np.array(episode_rewards)))
+        avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[-50:] ))
     
-    return np.array(losses), np.array(episode_rewards), np.array(epoch_rewards)
+    return np.array(losses), np.array(episode_rewards), np.array(avg_epoch_rewards)
 
 if __name__ == '__main__':
     run_dqn(DQNModel)

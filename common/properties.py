@@ -28,10 +28,3 @@ learning_rate = 1e-3
 gamma = 0.95
 epsilon = 0.1
 learning_rate = 1e-3
-
-action_set = {
-    0: 'u',
-    1: 'd',
-    2: 'l',
-    3: 'r',
-}
