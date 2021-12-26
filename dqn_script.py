@@ -5,33 +5,35 @@ from IPython.display import clear_output
 import random
 from matplotlib import pylab as plt
 from collections import deque
-from common.test import *
+# from tests.test_gw import *
 from environment.MarketEnv import MarketEnv
+from common.properties import *
+from dqn_net import DQNNet
 
-from agent.properties import *
+# DQNModel = DQNNet() # Market
+STATE_DIM = 64 # GW
+DQNModel = DQNNet(state_dim = STATE_DIM, output_size = 4) # GW
 
-if torch.cuda.is_available():
-    devid = torch.device('cuda:0')
-else:
-    devid = torch.device('cpu')
+model2 = copy.deepcopy(DQNModel.model)
+model2.load_state_dict(DQNModel.model.state_dict())
 
 for i in range(epochs):
-    
-    # numpy representation of initial state , reset
-    # game = Gridworld(size=4, mode='random')
+    # marketEnv = MarketEnv()
+    # state1_ = marketEnv.reset()
+    # state1 = torch.from_numpy(state1_).float().to(device = devid)
 
-    marketEnv = MarketEnv()
-    # rendered_game_boad_1 = game.board.render_np()
-    state1_ = marketEnv.reset()
-    # state1_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
-    state1 = torch.from_numpy(state1_).float().to(device = devid)
-        
+    game = Gridworld(size=4, mode='random')
+    rendered_game_boad_1 = game.board.render_np()
+    state1_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
+    state1 = torch.from_numpy(state1_).float()
+
     status = 1
     mov = 0
+
     while(status == 1): 
         j+=1
         mov += 1
-        qval = model(state1)
+        qval = DQNModel(state1)
         
         if not torch.cuda.is_available():
             qval_ = qval.data.numpy()
@@ -44,13 +46,18 @@ for i in range(epochs):
             action_ = np.argmax(qval_)
         
         action = action_
+        print(action)
         
         # Execute action and upate state, and get reward + boolTerminal
-        marketEnv.step(action)
+        # marketEnv.step(action)
+        # state2_, reward, done, info_dic = marketEnv.step(action)
         
-        # rendered_game_boad_2 = game.board.render_np()
-        state2_, reward, done, info_dic = marketEnv.step(action)
-        # state2_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
+        rendered_game_boad_2 = game.board.render_np() # GW
+        state2_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0 # GW
+        reward = game.reward() # GW
+        done = True if reward > 0 else False # GW
+
+
         state2 = torch.from_numpy(state2_).float()
 
         exp =  (state1, action_, reward, state2, done)
@@ -61,14 +68,14 @@ for i in range(epochs):
             minibatch = random.sample(replay, batch_size)
 
             # Could be replaced with pytorch gather
-            state1_batch = torch.cat([s1 for (s1,a,r,s2,d) in minibatch]).view(batch_size, l1).to(device = devid)
+            state1_batch = torch.cat([s1 for (s1,a,r,s2,d) in minibatch]).view(batch_size, STATE_DIM).to(device = devid)
             action_batch = torch.tensor([a for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
             reward_batch = torch.tensor([r for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
-            state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(batch_size, l1).to(device = devid)
+            state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(batch_size, STATE_DIM).to(device = devid)
             done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
 
             # Q update
-            Q1 = model(state1_batch).to(device = devid)
+            Q1 = DQNModel(state1_batch).to(device = devid)
             with torch.no_grad():
                 Q2 = model2(state2_batch).to(device = devid) #B
             
@@ -77,14 +84,15 @@ for i in range(epochs):
             loss = loss_fn(X, Y.detach())
             print(i, loss.item())
             # clear_output(wait=True)
-            optimizer.zero_grad()
+            
+            DQNModel.optimizer.zero_grad()
             loss.backward()
             losses.append(loss.item())
-            optimizer.step()
+            DQNModel.optimizer.step()
             
             if j % sync_freq == 0: #C
-                model2.load_state_dict(model.state_dict())
-        if reward != -1 or mov > max_moves:
+                model2.load_state_dict(DQNModel.model.state_dict())
+        if done or mov > max_moves:
             status = 0
             mov = 0
         

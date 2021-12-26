@@ -4,7 +4,7 @@ from environment.Gridworld import Gridworld
 from IPython.display import clear_output
 import random
 from matplotlib import pylab as plt
-from agent.properties import *
+from common.properties import *
 
 def test_model(model, mode='static', display=True):
     i = 0
