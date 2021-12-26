@@ -44,7 +44,7 @@ learning_rate = 1e-3
 # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 gamma = 0.9
-epsilon = 1.0
+epsilon = 0.1
 learning_rate = 1e-3
 
 gamma = 0.9
