@@ -6,7 +6,6 @@ import random
 from matplotlib import pylab as plt
 from collections import deque
 # from common.test import *
-
 from common.properties import *
 
 if torch.cuda.is_available():
