@@ -5,7 +5,7 @@ from IPython.display import clear_output
 import random
 from matplotlib import pylab as plt
 from collections import deque
-# from tests.test_gw import *
+from tests.test_gw import *
 from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn_net import DQNNet
@@ -58,7 +58,7 @@ for i in range(epochs):
         done = True if reward > 0 else False # GW
 
 
-        state2 = torch.from_numpy(state2_).float()
+        state2 = torch.from_numpy(state2_).float().to(device = devid)
 
         exp =  (state1, action_, reward, state2, done)
         replay.append(exp) #H
@@ -83,7 +83,7 @@ for i in range(epochs):
             X = Q1.gather(dim=1,index=action_batch.long().unsqueeze(dim=1)).squeeze()
             loss = loss_fn(X, Y.detach())
             print(i, loss.item())
-            # clear_output(wait=True)
+            clear_output(wait=True)
             
             DQNModel.optimizer.zero_grad()
             loss.backward()
@@ -102,3 +102,13 @@ plt.figure(figsize=(10,7))
 plt.plot(losses)
 plt.xlabel("Epochs",fontsize=22)
 plt.ylabel("Loss",fontsize=22)
+
+max_games = 1000
+wins = 0
+for i in range(max_games):
+    win = test_model(DQNModel.model, mode='random', display=False)
+    if win:
+        wins += 1
+win_perc = float(wins) / float(max_games)
+print("Games played: {0}, # of wins: {1}".format(max_games,wins))
+print("Win percentage: {}%".format(100.0*win_perc))
