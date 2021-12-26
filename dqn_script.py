@@ -11,10 +11,9 @@ from common.properties import *
 from dqn_net import DQNNet
 
 STATE_DIM = 2
-ACTION_DIM = 101
+ACTION_DIM = 401
 
-DQNModel = DQNNet() # Market
-# DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
+DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
 def run_dqn(DQNModel):
 
@@ -26,7 +25,7 @@ def run_dqn(DQNModel):
     j = 0
 
     for i in range(epochs):
-        marketEnv = MarketEnv()
+        marketEnv = MarketEnv(action_size = ACTION_DIM)
         state1_ = marketEnv.reset()
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         

@@ -2,12 +2,12 @@ import numpy as np
 
 class MarketEnv():
 
-    def __init__(self):
+    def __init__(self, action_size):
         self.max_inventory = 2500
         self.state_env_dim = 2
         
         self.inventory = self.max_inventory
-        self.action_space = np.arange(0, 101)
+        self.action_space = np.arange(0, action_size)
         self.action_env_dim = len(self.action_space)
 
         random_price = np.random.uniform(0, 100)
