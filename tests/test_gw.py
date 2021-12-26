@@ -10,7 +10,7 @@ def test_model(model, mode='static', display=True):
     i = 0
     test_game = Gridworld(mode=mode)
     state_ = test_game.board.render_np().reshape(1,64) + np.random.rand(1,64)/10.0
-    state = torch.from_numpy(state_).float()
+    state = torch.from_numpy(state_).float().to(device = devid)
     if display:
         print("Initial State:")
         print(test_game.display())
@@ -24,7 +24,7 @@ def test_model(model, mode='static', display=True):
             print('Move #: %s; Taking action: %s' % (i, action))
         test_game.makeMove(action)
         state_ = test_game.board.render_np().reshape(1,64) + np.random.rand(1,64)/10.0
-        state = torch.from_numpy(state_).float()
+        state = torch.from_numpy(state_).float().to(device = devid)
         if display:
             print(test_game.display())
         reward = test_game.reward()
