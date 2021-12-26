@@ -1,4 +1,7 @@
 from environment.GridBoard import *
+import torch
+from common.properties import *
+
 
 class Gridworld:
 
@@ -16,7 +19,7 @@ class Gridworld:
         self.board.addPiece('Goal','+',(1,0))
         self.board.addPiece('Pit','-',(2,0))
         self.board.addPiece('Wall','W',(3,0))
-        
+
         self.action_set = {
             0: 'u',
             1: 'd',
@@ -134,3 +137,13 @@ class Gridworld:
 
     def display(self):
         return self.board.render()
+
+    def step(self, action_):
+        action = self.action_set[action_]
+        self.makeMove(action)
+        rendered_game_boad_2 = self.board.render_np()
+        state2_ = self.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
+        state2 = torch.from_numpy(state2_).float().to(device = devid)
+        reward = self.reward()
+        done = True if reward > 0 else False
+        return reward, state2, done

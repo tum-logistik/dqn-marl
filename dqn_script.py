@@ -46,22 +46,24 @@ for i in range(epochs):
             action_ = np.argmax(qval_)
         
         # action = action_
-        action = game.action_set[action_] #GW
-        print(action)
         
         # Execute action and upate state, and get reward + boolTerminal
         # marketEnv.step(action)
         # state2_, reward, done, info_dic = marketEnv.step(action)
         
-        rendered_game_boad_2 = game.board.render_np() # GW
-        state2_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0 # GW
-        reward = game.reward() # GW
-        done = True if reward > 0 else False # GW
+        # action = game.action_set[action_]
+        # game.makeMove(action)
+        # print(action)
+        # rendered_game_boad_2 = game.board.render_np()
+        # state2_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
+        # state2 = torch.from_numpy(state2_).float().to(device = devid)
+        # reward = game.reward()
+        # done = True if reward > 0 else False
+        # exp =  (state1, action_, reward, state2, done)
 
-
-        state2 = torch.from_numpy(state2_).float().to(device = devid)
-
-        exp =  (state1, action_, reward, state2, done)
+        reward, state2, done = game.step(action_)
+        exp = (state1, action_, reward, state2, done)
+        
         replay.append(exp) #H
         state1 = state2
         
@@ -104,12 +106,12 @@ plt.plot(losses)
 plt.xlabel("Epochs",fontsize=22)
 plt.ylabel("Loss",fontsize=22)
 
-max_games = 1000
-wins = 0
-for i in range(max_games):
-    win = test_model(DQNModel.model, mode='random', display=False)
-    if win:
-        wins += 1
-win_perc = float(wins) / float(max_games)
-print("Games played: {0}, # of wins: {1}".format(max_games,wins))
-print("Win percentage: {}%".format(100.0*win_perc))
+# max_games = 1000
+# wins = 0
+# for i in range(max_games):
+#     win = test_model(DQNModel.model, mode='random', display=False)
+#     if win:
+#         wins += 1
+# win_perc = float(wins) / float(max_games)
+# print("Games played: {0}, # of wins: {1}".format(max_games,wins))
+# print("Win percentage: {}%".format(100.0*win_perc))
