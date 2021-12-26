@@ -20,12 +20,12 @@ model2.load_state_dict(DQNModel.model.state_dict())
 for i in range(epochs):
     # marketEnv = MarketEnv()
     # state1_ = marketEnv.reset()
-    # state1 = torch.from_numpy(state1_).float().to(device = devid)
-
+    
     game = Gridworld(size=4, mode='random')
     rendered_game_boad_1 = game.board.render_np()
     state1_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
-    state1 = torch.from_numpy(state1_).float()
+
+    state1 = torch.from_numpy(state1_).float().to(device = devid)
 
     status = 1
     mov = 0
