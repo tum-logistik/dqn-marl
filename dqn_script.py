@@ -88,7 +88,6 @@ def run_dqn(DQNModel):
                 avg_episode_reward = np.mean(np.array(rewards))
                 clear_output(wait=True)
                 episode_rewards.append(avg_episode_reward)
-
                 status = 0
                 mov = 0
                 
