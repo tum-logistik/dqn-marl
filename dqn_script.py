@@ -21,6 +21,7 @@ target_net.load_state_dict(DQNModel.model.state_dict())
 for i in range(epochs):
     marketEnv = MarketEnv()
     state1_ = marketEnv.reset()
+    state1 = torch.from_numpy(state1_).float().to(device = devid)
     
     status = 1
     mov = 0
@@ -44,7 +45,8 @@ for i in range(epochs):
         # Execute action and upate state, and get reward + boolTerminal
         action = action_ind
         marketEnv.step(action)
-        state2, reward, done, info_dic = marketEnv.step(action)
+        state2_, reward, done, info_dic = marketEnv.step(action)
+        state2 = torch.from_numpy(state2_).float().to(device = devid)
         exp = (state1, action, reward, state2, done)
         
         replay.append(exp) #H
