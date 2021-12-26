@@ -48,7 +48,6 @@ epsilon = 0.1
 learning_rate = 1e-3
 
 gamma = 0.9
-epsilon = 1.0
 
 action_set = {
     0: 'u',
