@@ -17,11 +17,11 @@ else:
 # l3 = 100
 # l4 = 101 # 4
 
-mem_size = 1000
+mem_size = 500
 batch_size = 50
 replay = deque(maxlen=mem_size)
 
-epochs = 1000
+epochs = 500
 losses = [] #A
 
 max_moves = 50
