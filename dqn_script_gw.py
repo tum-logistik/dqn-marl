@@ -9,6 +9,7 @@ from tests.test_gw import *
 from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn_net import DQNNet
+from tests.test_gw import *
 
 STATE_DIM = 64 # GW
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = 4) # GW
@@ -75,7 +76,7 @@ plt.ylabel("Loss",fontsize=22)
 max_games = 1000
 wins = 0
 for i in range(max_games):
-    win = test_model(model, mode='random', display=False)
+    win = test_model(DQNModel.model, mode='random', display=False)
     if win:
         wins += 1
 win_perc = float(wins) / float(max_games)
