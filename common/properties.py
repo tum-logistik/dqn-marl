@@ -26,7 +26,7 @@ j=0
 loss_fn = torch.nn.MSELoss()
 learning_rate = 1e-3
 
-gamma = 1.0
+gamma = 0.95
 epsilon = 0.1
 learning_rate = 1e-3
 
