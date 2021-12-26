@@ -9,7 +9,7 @@ from environment.MarketEnv import MarketEnv
 from common.properties import *
 
 class DQNNet():
-    
+
     def __init__(self, state_dim = 2, hidden_size = 150, output_size = 101):
         
         self.model = torch.nn.Sequential(
@@ -21,7 +21,7 @@ class DQNNet():
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
 
     def __call__(self, state):
-        return self.model(state)
+        return self.model(state).to(device = devid)
     
     
 
