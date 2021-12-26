@@ -2,7 +2,7 @@ import numpy as np
 
 class MarketEnv():
 
-    def __init__(self, action_size, max_demand = 200, demand_slope = 0.5):
+    def __init__(self, action_size, max_demand = 50, demand_slope = 0.5):
         self.max_inventory = 2500
         self.state_env_dim = 2
         
