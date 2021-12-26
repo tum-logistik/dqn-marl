@@ -45,7 +45,8 @@ for i in range(epochs):
         else:
             action_ = np.argmax(qval_)
         
-        action = action_
+        # action = action_
+        action = game.action_set[action_] #GW
         print(action)
         
         # Execute action and upate state, and get reward + boolTerminal

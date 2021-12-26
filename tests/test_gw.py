@@ -17,7 +17,12 @@ def test_model(model, mode='static', display=True):
     status = 1
     while(status == 1): #A
         qval = model(state)
-        qval_ = qval.data.numpy()
+
+        if not torch.cuda.is_available():
+            qval_ = qval.data.numpy()
+        else:
+            qval_ = qval.data.cpu().numpy()
+        
         action_ = np.argmax(qval_) #B
         action = action_set[action_]
         if display:

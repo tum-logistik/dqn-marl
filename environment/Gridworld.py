@@ -2,6 +2,8 @@ from environment.GridBoard import *
 
 class Gridworld:
 
+    
+
     def __init__(self, size=4, mode='static'):
         if size >= 4:
             self.board = GridBoard(size=size)
@@ -14,6 +16,13 @@ class Gridworld:
         self.board.addPiece('Goal','+',(1,0))
         self.board.addPiece('Pit','-',(2,0))
         self.board.addPiece('Wall','W',(3,0))
+        
+        self.action_set = {
+            0: 'u',
+            1: 'd',
+            2: 'l',
+            3: 'r',
+        }
 
         if mode == 'static':
             self.initGridStatic()
