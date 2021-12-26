@@ -38,7 +38,7 @@ for i in range(epochs):
             qval_ = qval.data.cpu().numpy()
         
         if (random.random() < epsilon):
-            action_ind = np.random.randint(0,4)
+            action_ind = np.random.randint(0, ACTION_DIM)
         else:
             action_ind = np.argmax(qval_)
         

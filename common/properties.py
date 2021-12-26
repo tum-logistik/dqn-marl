@@ -11,11 +11,6 @@ if torch.cuda.is_available():
 else:
     devid = torch.device('cpu')
 
-# l1 = 2 # 64
-# l2 = 150
-# l3 = 100
-# l4 = 101 # 4
-
 mem_size = 1000
 batch_size = 50
 replay = deque(maxlen=mem_size)
@@ -28,26 +23,12 @@ h = 0
 sync_freq = 500 #A
 j=0
 
-# model = torch.nn.Sequential(
-#     torch.nn.Linear(l1, l2),
-#     torch.nn.ReLU(),
-#     torch.nn.Linear(l2, l3),
-#     torch.nn.ReLU(),
-#     torch.nn.Linear(l3,l4)
-# ).to(device = devid)
-
-# model2 = copy.deepcopy(model) #A
-# model2.load_state_dict(model.state_dict()) #B|
-
 loss_fn = torch.nn.MSELoss()
 learning_rate = 1e-3
-# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-gamma = 0.9
+gamma = 0.95
 epsilon = 0.1
 learning_rate = 1e-3
-
-gamma = 0.9
 
 action_set = {
     0: 'u',
@@ -55,4 +36,3 @@ action_set = {
     2: 'l',
     3: 'r',
 }
-
