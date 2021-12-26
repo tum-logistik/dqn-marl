@@ -16,6 +16,7 @@ DQNModel = DQNNet(state_dim = STATE_DIM, output_size = 4) # GW
 
 target_net = copy.deepcopy(DQNModel.model)
 target_net.load_state_dict(DQNModel.model.state_dict())
+j = 0
 
 for i in range(epochs):
     game = Gridworld(size=4, mode='random') # GW
@@ -25,6 +26,7 @@ for i in range(epochs):
 
     status = 1
     mov = 0
+    
 
     while(status == 1): 
         j+=1
