@@ -21,7 +21,7 @@ mem_size = 1000
 batch_size = 50
 replay = deque(maxlen=mem_size)
 
-epochs = 5000
+epochs = 1000
 losses = [] #A
 
 max_moves = 50
