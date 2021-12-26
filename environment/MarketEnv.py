@@ -38,7 +38,8 @@ class MarketEnv():
         previous_ref_price = self.current_state[1]
 
         demand_lambda = self.max_demand - self.demand_slope*set_price
-        demand = np.floor(np.random.poisson(demand_lambda))
+        clipped_lambda = np.max([demand_lambda, 0])
+        demand = np.floor(np.random.poisson(clipped_lambda))
         
         # reward = ((previous_ref_price + set_price)/2) * demand
         reward = set_price * demand

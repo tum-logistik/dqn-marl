@@ -19,6 +19,8 @@ class DQNNet():
             torch.nn.ReLU(),
             torch.nn.Linear(hidden_size,output_size)).to(device = devid)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
+        self.output_size = output_size
+        self.state_dim = state_dim
     
     def __call__(self, state):
         return self.model(state).to(device = devid)

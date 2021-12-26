@@ -11,7 +11,7 @@ from common.properties import *
 from dqn_net import DQNNet
 
 STATE_DIM = 2
-ACTION_DIM = 51
+ACTION_DIM = 301
 
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
@@ -25,7 +25,7 @@ def run_dqn(DQNModel):
     j = 0
 
     for i in range(epochs):
-        marketEnv = MarketEnv(action_size = ACTION_DIM)
+        marketEnv = MarketEnv(action_size = DQNModel.output_size)
         state1_ = marketEnv.reset()
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         
@@ -45,7 +45,7 @@ def run_dqn(DQNModel):
                 qval_ = qval.data.cpu().numpy()
             
             if (random.random() < epsilon):
-                action_ind = np.random.randint(0, ACTION_DIM)
+                action_ind = np.random.randint(0, DQNModel.output_size)
             else:
                 action_ind = np.argmax(qval_)
             
@@ -69,7 +69,7 @@ def run_dqn(DQNModel):
             
             if len(replay) > batch_size:
                 minibatch = random.sample(replay, batch_size)
-                Q1, Q2, X, Y, loss = DQNModel.batch_update(minibatch, target_net, STATE_DIM)
+                Q1, Q2, X, Y, loss = DQNModel.batch_update(minibatch, target_net, DQNModel.state_dim)
 
                 print(i, loss.item())
                 clear_output(wait=True)
