@@ -31,7 +31,8 @@ class MarketEnv():
     # .step(action)
     def step(self, action_index):
         previous_ref_price = self.current_state[1]
-        demand_lambda = 50 - 0.5*previous_ref_price
+        # demand_lambda = 50 - 0.5*previous_ref_price
+        demand_lambda = 200 - 0.5*previous_ref_price
         demand = np.floor(np.random.poisson(demand_lambda))
         set_price = self.action_space[action_index]
 
