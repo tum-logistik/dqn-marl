@@ -21,7 +21,6 @@ losses = [] #A
 max_moves = 50
 h = 0
 sync_freq = 500 #A
-j=0
 
 loss_fn = torch.nn.MSELoss()
 learning_rate = 1e-3
