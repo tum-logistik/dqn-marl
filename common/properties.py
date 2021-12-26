@@ -11,14 +11,14 @@ if torch.cuda.is_available():
 else:
     devid = torch.device('cpu')
 
-mem_size = 1000
+mem_size = 500
 batch_size = 50
 replay = deque(maxlen=mem_size)
 
-epochs = 500
+epochs = 4000
 losses = [] #A
 
-max_moves = 50
+max_moves = 25
 h = 0
 sync_freq = 500 #A
 
