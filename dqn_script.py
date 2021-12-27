@@ -15,7 +15,7 @@ ACTION_DIM = 301
 
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
-def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM)):
+def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM, epochs = EPOCHS)):
 
     target_net = copy.deepcopy(DQNModel.model)
     target_net.load_state_dict(DQNModel.model.state_dict())
@@ -50,8 +50,6 @@ def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM)):
             
             # Execute action and upate state, and get reward + boolTerminal
             action = action_ind
-            
-            
             marketEnv.step(action)
             state2_, reward, done, info_dic = marketEnv.step(action)
             state2 = torch.from_numpy(state2_).float().to(device = devid)
