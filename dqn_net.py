@@ -21,6 +21,7 @@ class DQNNet():
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
         self.output_size = output_size
         self.state_dim = state_dim
+        self.gamma = gamma
     
     def __call__(self, state):
         return self.model(state).to(device = devid)
