@@ -12,11 +12,11 @@ else:
     devid = torch.device('cpu')
 
 EPOCHS = 500
+GAMMA = 0.8
 
 mem_size = 500
 batch_size = 50
 replay = deque(maxlen=mem_size)
-
 
 losses = [] #A
 
@@ -27,6 +27,5 @@ sync_freq = 40 #A
 loss_fn = torch.nn.MSELoss()
 learning_rate = 1e-3
 
-GAMMA = 0.8
 epsilon = 0.1
 learning_rate = 1e-3
