@@ -28,6 +28,7 @@ def run_dqn(DQNModel,
 
     episode_rewards = []
     avg_epoch_rewards = []
+    losses = []
     j = 0
 
     for i in range(epochs):
@@ -37,7 +38,7 @@ def run_dqn(DQNModel,
         status = 1
         mov = 0
         rewards = []
-        losses = []
+        
 
         while(status == 1): 
             j+=1
