@@ -15,7 +15,7 @@ ACTION_DIM = 301
 
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
-def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM, epochs = EPOCHS)):
+def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM),  epochs = EPOCHS):
 
     target_net = copy.deepcopy(DQNModel.model)
     target_net.load_state_dict(DQNModel.model.state_dict())
