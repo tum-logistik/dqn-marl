@@ -14,7 +14,7 @@ marketEnv1 = MarketEnv(action_size = ACTION_DIM)
 losses, episode_rewards, epoch_rewards = run_dqn(DQNModel, 
                                                  marketEnv = marketEnv1,
                                                  batch_size = BATCH_SIZE,
-                                                 epochs = 6000,
+                                                 epochs = 100,
                                                  explore_epsilon = 0.2,
                                                  max_steps = 100,
                                                  sync_freq = 10)
@@ -37,5 +37,5 @@ plt.ylabel("Avg Reward",fontsize=22)
 plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
 
 # perhaps pickle and save the model
-torch.save(DQNModel, "./output/%s_dqn_model.png"%env_id)
+torch.save(DQNModel, "./output/%s_dqn_model"%env_id)
 # dqn2 = torch.load("./output/%s_dqn_model.png"%env_id)
