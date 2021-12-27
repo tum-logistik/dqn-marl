@@ -15,7 +15,7 @@ ACTION_DIM = 301
 
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
-def run_dqn(DQNModel):
+def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM)):
 
     target_net = copy.deepcopy(DQNModel.model)
     target_net.load_state_dict(DQNModel.model.state_dict())
@@ -25,7 +25,6 @@ def run_dqn(DQNModel):
     j = 0
 
     for i in range(epochs):
-        marketEnv = MarketEnv(action_size = DQNModel.output_size)
         state1_ = marketEnv.reset()
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         
