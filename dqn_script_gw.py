@@ -18,6 +18,10 @@ target_net = copy.deepcopy(DQNModel.model)
 target_net.load_state_dict(DQNModel.model.state_dict())
 j = 0
 
+losses = []
+loss_fn = DEFAULT_LOSS_FUNC
+explore_epsilon = EXPLORE_EPSILON
+
 for i in range(EPOCHS):
     game = Gridworld(size=4, mode='random') # GW
     rendered_game_boad_1 = game.board.render_np()
@@ -38,7 +42,7 @@ for i in range(EPOCHS):
         else:
             qval_ = qval.data.cpu().numpy()
         
-        if (random.random() < epsilon):
+        if (random.random() < explore_epsilon):
             action_ = np.random.randint(0,4)
         else:
             action_ = np.argmax(qval_)
@@ -49,8 +53,8 @@ for i in range(EPOCHS):
         replay.append(exp)
         state1 = state2
         
-        if len(replay) > batch_size:
-            minibatch = random.sample(replay, batch_size)
+        if len(replay) > BATCH_SIZE:
+            minibatch = random.sample(replay, BATCH_SIZE)
             Q1, Q2, X, Y, loss = DQNModel.batch_update(minibatch, target_net, STATE_DIM)
 
             print(i, loss.item())
@@ -61,10 +65,10 @@ for i in range(EPOCHS):
             losses.append(loss.item())
             DQNModel.optimizer.step()
             
-            if j % sync_freq == 0:
+            if j % SYNC_FREQ == 0:
                 target_net.load_state_dict(DQNModel.model.state_dict())
         
-        if done or mov > max_moves:
+        if done or mov > MAX_STEPS:
             status = 0
             mov = 0
         

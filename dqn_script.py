@@ -15,7 +15,13 @@ ACTION_DIM = 301
 
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
-def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM),  epochs = EPOCHS):
+def run_dqn(DQNModel, 
+            marketEnv = MarketEnv(action_size = ACTION_DIM), 
+            epochs = EPOCHS, 
+            batch_size = BATCH_SIZE,
+            max_steps = MAX_STEPS,
+            sync_freq = SYNC_FREQ,
+            explore_epsilon = EXPLORE_EPSILON):
 
     target_net = copy.deepcopy(DQNModel.model)
     target_net.load_state_dict(DQNModel.model.state_dict())
@@ -31,6 +37,7 @@ def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM),  epochs =
         status = 1
         mov = 0
         rewards = []
+        losses = []
 
         while(status == 1): 
             j+=1
@@ -43,7 +50,7 @@ def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM),  epochs =
             else:
                 qval_ = qval.data.cpu().numpy()
             
-            if (random.random() < epsilon):
+            if (random.random() < explore_epsilon):
                 action_ind = np.random.randint(0, DQNModel.output_size)
             else:
                 action_ind = np.argmax(qval_)
@@ -76,10 +83,10 @@ def run_dqn(DQNModel, marketEnv = MarketEnv(action_size = ACTION_DIM),  epochs =
                 losses.append(loss.item())
                 DQNModel.optimizer.step()
                 
-                if j % sync_freq == 0: #C
+                if j % sync_freq == 0:
                     target_net.load_state_dict(DQNModel.model.state_dict())
 
-            if done or mov > max_moves:
+            if done or mov > max_steps:
                 
                 avg_episode_reward = np.mean(np.array(rewards))
                 clear_output(wait=True)

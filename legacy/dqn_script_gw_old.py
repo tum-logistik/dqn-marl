@@ -64,7 +64,7 @@ for i in range(epochs):
             
             if j % sync_freq == 0: #C
                 model2.load_state_dict(model.state_dict())
-        if reward != -1 or mov > max_moves:
+        if reward != -1 or mov > MAX_STEPS:
             status = 0
             mov = 0
         

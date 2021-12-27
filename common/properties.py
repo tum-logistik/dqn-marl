@@ -11,22 +11,20 @@ if torch.cuda.is_available():
 else:
     devid = torch.device('cpu')
 
+# Shared Parameters
+BATCH_SIZE = 400
+
+# DQN Iterative Parameters
 EPOCHS = 4000
-GAMMA = 0.8
+EXPLORE_EPSILON = 0.1
+MAX_STEPS = 25
+SYNC_FREQ = 40
+MEM_SIZE = 500
+replay = deque(maxlen = MEM_SIZE)
+
+# DQN Parameters
 HIDDEN_SIZE = 200
+GAMMA = 0.8
+DEFAULT_LOSS_FUNC = torch.nn.MSELoss()
+LEARNING_RATE = 1e-3
 
-mem_size = 500
-batch_size = 400
-replay = deque(maxlen=mem_size)
-
-losses = [] #A
-
-max_moves = 25
-h = 0
-sync_freq = 40 #A
-
-loss_fn = torch.nn.MSELoss()
-learning_rate = 1e-3
-
-epsilon = 0.1
-learning_rate = 1e-3
