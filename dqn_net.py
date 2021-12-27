@@ -10,7 +10,7 @@ from common.properties import *
 
 class DQNNet():
 
-    def __init__(self, state_dim, output_size, hidden_size = 150, gamma = GAMMA):
+    def __init__(self, state_dim, output_size, hidden_size = HIDDEN_SIZE, gamma = GAMMA):
         
         self.model = torch.nn.Sequential(
             torch.nn.Linear(state_dim, hidden_size),
