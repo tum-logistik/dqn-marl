@@ -10,7 +10,7 @@ from common.properties import *
 
 class DQNNet():
 
-    def __init__(self, state_dim, output_size, hidden_size = 150):
+    def __init__(self, state_dim, output_size, hidden_size = 150, gamma = GAMMA):
         
         self.model = torch.nn.Sequential(
             torch.nn.Linear(state_dim, hidden_size),
@@ -37,7 +37,7 @@ class DQNNet():
         with torch.no_grad():
             Q2 = target_net(state2_batch).to(device = devid) #B
         
-        Y = reward_batch + GAMMA * ((1-done_batch) * torch.max(Q2,dim=1)[0])
+        Y = reward_batch + gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
         X = Q1.gather(dim=1,index=action_batch.long().unsqueeze(dim=1)).squeeze()
         loss = loss_fn(X, Y.detach())
 
