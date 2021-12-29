@@ -156,6 +156,5 @@ def run_dqn_eval(DQNModel,
     
     return np.array(episode_rewards), np.array(avg_epoch_rewards)
 
-
 if __name__ == '__main__':
     run_dqn(DQNModel)
