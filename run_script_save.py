@@ -14,7 +14,7 @@ marketEnv1 = MarketEnv(action_size = ACTION_DIM)
 losses, episode_rewards, epoch_rewards = run_dqn(DQNModel, 
                                                  marketEnv = marketEnv1,
                                                  batch_size = BATCH_SIZE,
-                                                 epochs = 60000,
+                                                 epochs = 6000,
                                                  explore_epsilon = 0.2,
                                                  max_steps = 100,
                                                  sync_freq = 10)
