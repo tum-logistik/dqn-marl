@@ -45,8 +45,8 @@ class DQNNet():
         with torch.no_grad():
             Q2 = target_net(state2_batch).to(device = devid)
         
-        Y = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
-        X = Q1.gather(dim=1,index=action_batch.long().unsqueeze(dim=1)).squeeze()
-        loss = self.loss_fn(X, Y.detach())
+        Q_formula = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
+        Q_net = Q1.gather(dim=1,index=action_batch.long().unsqueeze(dim=1)).squeeze()
+        loss = self.loss_fn(Q_net, Q_formula.detach())
 
-        return Q1, Q2, X, Y, loss
+        return Q1, Q2, Q_net, Q_formula, loss
