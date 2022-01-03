@@ -2,7 +2,6 @@ import numpy as np
 import torch
 from IPython.display import clear_output
 import random
-from matplotlib import pylab as plt
 from collections import deque
 import copy
 
@@ -28,3 +27,6 @@ GAMMA = 0.8
 DEFAULT_LOSS_FUNC = torch.nn.MSELoss()
 LEARNING_RATE = 1e-3
 
+# MDP Parameters
+ACTION_DIM = 301
+STATE_DIM = 2

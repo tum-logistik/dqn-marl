@@ -10,9 +10,6 @@ from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn_net import DQNNet
 
-STATE_DIM = 2
-ACTION_DIM = 301
-
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
 def run_dqn(DQNModel, 
@@ -63,7 +60,7 @@ def run_dqn(DQNModel,
             state2 = torch.from_numpy(state2_).float().to(device = devid)
             exp = (state1, action, reward, state2, done)
             
-            replay.append(exp) #H
+            replay.append(exp)
             state1 = state2
             
             rewards.append(reward)
