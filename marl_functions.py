@@ -25,8 +25,13 @@ for i in range(dummy_market.max_inventory):
     for a in range(ACTION_DIM):
         state_id = str(i) + "-" + str(a)
         VISIT_COUNTER[state_id] = 0
-        SAS_PROB_DIC[state_id] = 1 / STATE_SPACE_SIZE
+        SAS_PROB_DIC[state_id] = dict()
+        for SAS_PROB_DIC[state_id]:
+            SAS_PROB_DIC[state_id]
 ### End market specific ###
+
+## State representation is a joing state of all inventories... 
+
 
 # n_agent starts from 0
 def prob_action(s, n_agent, dqn_model, explore_epsilon = EXPLORE_EPSILON, n_agents = N_AGENTS, action_dim = ACTION_DIM, state_dim = STATE_DIM):
@@ -53,9 +58,9 @@ def prob_action(s, n_agent, dqn_model, explore_epsilon = EXPLORE_EPSILON, n_agen
     # subset q_values of agent
     return prob_output
 
-def prob_state_trans(s_next, a, s, sas_prob_dic = SAS_PROB_DIC):
+def prob_state_trans(s_next, a, s, env, sas_prob_dic = SAS_PROB_DIC):
     # 1 / |s| (to start)... update to: prob_state_trans() + (1 - prob_state_trans() )/(Num. visit_counter[s][a])
-    
+    env_copy = copy.deepcopy(env)
     
     # return sas_prob_dic[]
 
