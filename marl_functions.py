@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from environment.Gridworld import Gridworld
 from IPython.display import clear_output
 import random
 from collections import deque
@@ -12,25 +11,17 @@ from dqn_net import DQNNet
 # SA deepQ network will handle exploded MA net.
 N_AGENTS = 2
 
-
 VISIT_COUNTER = dict() # dic of (s, a) -> count
 SAS_PROB_DIC = dict() # dic of (s, a) -> count
 
-### Market Specific ###
-dummy_market = MarketEnv(action_size = ACTION_DIM)
-STATE_SPACE_SIZE = dummy_market.max_inventory * ACTION_DIM
-
-# String inventory-price to denote state
-for i in range(dummy_market.max_inventory):
-    for a in range(ACTION_DIM):
-        state_id = str(i) + "-" + str(a)
-        VISIT_COUNTER[state_id] = 0
-        SAS_PROB_DIC[state_id] = dict()
-        for SAS_PROB_DIC[state_id]:
-            SAS_PROB_DIC[state_id]
-### End market specific ###
-
 ## State representation is a joing state of all inventories... 
+dummy_market = MarketEnv(action_size = ACTION_DIM)
+STATE_SPACE_SIZE = dummy_market.state_space_size
+
+
+
+
+
 
 
 # n_agent starts from 0
