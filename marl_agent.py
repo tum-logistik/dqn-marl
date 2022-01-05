@@ -18,11 +18,10 @@ SAS_PROB_DIC = dict() # dic of (s, a) -> count
 
 class MARLAgent(DQNNet):
 
-    def __init__(self, env, 
-        n_agents = N_AGENTS):
+    def __init__(self, env):
         self.n_visit_dic = dict()
         self.s_trans_prob = dict()
-        self.n_agents = n_agents
+        self.n_agents = env.n_agents
         self.action_size = env.action_size
 
 

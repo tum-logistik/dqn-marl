@@ -1,3 +1,4 @@
+import numpy as np
 from marl_functions import *
 from marl_agent import *
 

@@ -1,6 +1,8 @@
 import numpy as np
 import itertools
 
+# np.random.bit_generator = np.random._bit_generator
+
 class MarketEnv():
 
     def __init__(self, action_size, max_demand = 50, demand_slope = 0.5, n_agents = 1, max_inventory = 2500):
@@ -50,13 +52,13 @@ class MarketEnv():
         
     # .step(action)
     # Takes price index as step argument
-    def step(self, action_index):
+    def step(self, action_index, n_agents = 1):
+        
+        # previous_ref_price = self.current_state[-1]
         set_price = self.action_space[action_index]
-        previous_ref_price = self.current_state[1]
-
         demand_lambda = self.max_demand - self.demand_slope*set_price
         clipped_lambda = np.max([demand_lambda, 0])
-        demand = np.floor(np.random.poisson(clipped_lambda))
+        demand = np.floor(np.random.poisson(clipped_lambda))        
         
         # reward = ((previous_ref_price + set_price)/2) * demand
         reward = set_price * demand
@@ -72,6 +74,64 @@ class MarketEnv():
             self.current_state[0] = self.max_inventory
         
         return next_state, reward, inventory_limit, dict()
+    
+    def joint_step(self, action_indices):
+        
+        # previous_ref_price = self.current_state[-1]
+        action_values = action_indices # special case
+        selected_joint_act_index = int(np.min(action_values)) # minimum or average or any other function, current or previous time
+        set_price = self.action_space[selected_joint_act_index]
+        demand_lambda = self.max_demand - self.demand_slope*set_price
+
+        clipped_lambda = np.max([demand_lambda, 0])
+        demand = np.floor(np.random.poisson(clipped_lambda))        
+        
+        # different rewards for each agent, based on realized demand
+        
+        auction_counts = self.auction_system(action_values, demand)
+
+        # reward = set_price * demand
+        actionable_actions = auction_counts # available inventory
+        inventories = self.current_state[0:self.n_agents] - auction_counts
+        for i in range(len(inventories)):
+            if inventories[i] < 0:
+                actionable_actions[i] = self.current_state[0:self.n_agents][i] # sold out, take previous inventory
+                inventories[i] = 0
+
+        
+
+        rewards = np.multiply(actionable_actions, action_values+1) # limit min sale price to 1
+
+
+        # state update, reminder last index = set price
+        self.current_state[self.n_agents] = set_price
+        if inventories.any  > 0:
+            inventory_limit = False
+            self.current_state[0:self.n_agents] = inventories
+            
+            next_state = self.current_state
+        else:
+            inventory_limit = True
+            self.current_state[0:self.n_agents] = self.max_inventory
+        
+        return next_state, rewards, inventory_limit, dict()
+
+    def auction_system(self, agent_actions, demand):
+
+        # assume indices is price value
+        # new_ref_price = np.min(agent_actions)
+        win_probs = np.exp(agent_actions)/np.sum(np.exp(agent_actions))
+        agent_ids = np.arange(0, len(agent_actions))
+        auction_win_agent = np.zeros(len(agent_actions))
+
+        for d in range(int(demand)):
+            vi = np.random.choice(agent_ids, 1, p=win_probs, replace=False)
+            auction_win_agent[vi] += 1
+        
+        return auction_win_agent
+            
+
+
 
     def price_translate_from_index(self, i):
         return float(i)

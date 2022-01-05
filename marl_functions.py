@@ -38,7 +38,8 @@ def run_marl(MARLAgent,
             mov += 1
             
             # pick agent to play, loop over all agents
-            for n in range(marketEnv.n_agents):
+            agent_action_indices = np.zeros(MARLAgent.n_agents)
+            for n in range(MARLAgent.n_agents):
                 play_prob = MARLAgent.prob_action(state1, 0)
 
                 if (random.random() < explore_epsilon):
@@ -47,35 +48,38 @@ def run_marl(MARLAgent,
                     action_ind = np.argmax(play_prob)
                 
                 # Execute action and upate state, and get reward + boolTerminal
-                action = action_ind
-                marketEnv.step(action)
-                state2_, reward, done, info_dic = marketEnv.step(action)
-                state2 = torch.from_numpy(state2_).float().to(device = devid)
-                exp = (state1, action, reward, state2, done)
-                
-                replay.append(exp)
-                state1 = state2
-                
-                rewards.append(reward)
+                agent_action_indices[n] = action_ind
+            
+            marketEnv.joint_step(agent_action_indices)
+            
 
-                # print out
-                print(action)
-                print(reward)
-                
-                if len(replay) > batch_size:
-                    minibatch = random.sample(replay, batch_size)
-                    Q1, Q2, X, Y, loss = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
+            state2_, reward, done, info_dic = marketEnv.step(action)
+            state2 = torch.from_numpy(state2_).float().to(device = devid)
+            exp = (state1, action, reward, state2, done)
+            
+            replay.append(exp)
+            state1 = state2
+            
+            rewards.append(reward)
 
-                    print(i, loss.item())
-                    clear_output(wait=True)
-                    
-                    MARLAgent.optimizer.zero_grad()
-                    loss.backward()
-                    losses.append(loss.item())
-                    MARLAgent.optimizer.step()
-                    
-                    if j % sync_freq == 0:
-                        target_net.load_state_dict(MARLAgent.model.state_dict())
+            # print out
+            print(action)
+            print(reward)
+            
+            if len(replay) > batch_size:
+                minibatch = random.sample(replay, batch_size)
+                Q1, Q2, X, Y, loss = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
+
+                print(i, loss.item())
+                clear_output(wait=True)
+                
+                MARLAgent.optimizer.zero_grad()
+                loss.backward()
+                losses.append(loss.item())
+                MARLAgent.optimizer.step()
+                
+                if j % sync_freq == 0:
+                    target_net.load_state_dict(MARLAgent.model.state_dict())
 
             if done or mov > max_steps:
                 
