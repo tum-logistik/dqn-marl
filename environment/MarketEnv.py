@@ -39,11 +39,11 @@ class MarketEnv():
     def seed(self, seed):
         return None
     
-    # .reset()
+    # state is defined as inventories of each agent + 
     def reset(self):
         random_ref_price = np.random.uniform(0, self.action_size)
         self.inventory = self.max_inventory
-        return np.array([self.inventory, random_ref_price])
+        return np.array([self.inventory] * self.n_agents + [random_ref_price])
     
     def get_random_price(self):
         return np.random.uniform(0, self.action_size)

@@ -23,6 +23,8 @@ class MARLAgent(DQNNet):
         self.n_visit_dic = dict()
         self.s_trans_prob = dict()
         self.n_agents = n_agents
+        self.action_size = env.action_size
+
 
         for s in env.state_space:
             self.n_visit_dic[repr(s)] = 0 
@@ -34,7 +36,7 @@ class MARLAgent(DQNNet):
         
         self.joint_action_size = env.action_size * env.n_agents
 
-        super(MARLAgent, self).__init__(env.state_space_size, self.joint_action_size, 
+        super(MARLAgent, self).__init__(env.state_env_dim, self.joint_action_size, 
             hidden_size = HIDDEN_SIZE, 
             gamma = GAMMA, 
             batch_size = BATCH_SIZE,
@@ -53,15 +55,15 @@ class MARLAgent(DQNNet):
         else:
             qval_np = q_values.data.cpu().numpy()
         
-        index = n_agent*ACTION_DIM
-        q_slice = qval_np[index:index+ACTION_DIM] # slice of the Q(s, a) output belonging to the n_agent
+        index = n_agent*self.action_size
+        q_slice = qval_np[index:index+self.action_size] # slice of the Q(s, a) output belonging to the n_agent
         
         action_ind = np.argmax(q_slice)
         prob_output = np.ones(len(q_slice)) * (explore_epsilon / (state_dim - 1) )
         prob_output[action_ind] = 1 - explore_epsilon
         
         joint_action_prob = np.zeros(self.joint_action_size)
-        joint_action_prob[index:index+ACTION_DIM] = prob_output
+        joint_action_prob[index:index+self.action_size] = prob_output
 
         return joint_action_prob
     

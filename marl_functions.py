@@ -37,43 +37,45 @@ def run_marl(MARLAgent,
             j += 1
             mov += 1
             
-            play_prob = MARLAgent.prob_action(state1, marketEnv.n_agents)
+            # pick agent to play, loop over all agents
+            for n in range(marketEnv.n_agents):
+                play_prob = MARLAgent.prob_action(state1, 0)
 
-            if (random.random() < explore_epsilon):
-                action_ind = np.random.randint(0, MARLAgent.output_size)
-            else:
-                action_ind = np.argmax(play_prob)
-            
-            # Execute action and upate state, and get reward + boolTerminal
-            action = action_ind
-            marketEnv.step(action)
-            state2_, reward, done, info_dic = marketEnv.step(action)
-            state2 = torch.from_numpy(state2_).float().to(device = devid)
-            exp = (state1, action, reward, state2, done)
-            
-            replay.append(exp)
-            state1 = state2
-            
-            rewards.append(reward)
-
-            # print out
-            print(action)
-            print(reward)
-            
-            if len(replay) > batch_size:
-                minibatch = random.sample(replay, batch_size)
-                Q1, Q2, X, Y, loss = DQNModel.batch_update(minibatch, target_net, DQNModel.state_dim)
-
-                print(i, loss.item())
-                clear_output(wait=True)
+                if (random.random() < explore_epsilon):
+                    action_ind = np.random.randint(0, MARLAgent.output_size)
+                else:
+                    action_ind = np.argmax(play_prob)
                 
-                DQNModel.optimizer.zero_grad()
-                loss.backward()
-                losses.append(loss.item())
-                DQNModel.optimizer.step()
+                # Execute action and upate state, and get reward + boolTerminal
+                action = action_ind
+                marketEnv.step(action)
+                state2_, reward, done, info_dic = marketEnv.step(action)
+                state2 = torch.from_numpy(state2_).float().to(device = devid)
+                exp = (state1, action, reward, state2, done)
                 
-                if j % sync_freq == 0:
-                    target_net.load_state_dict(DQNModel.model.state_dict())
+                replay.append(exp)
+                state1 = state2
+                
+                rewards.append(reward)
+
+                # print out
+                print(action)
+                print(reward)
+                
+                if len(replay) > batch_size:
+                    minibatch = random.sample(replay, batch_size)
+                    Q1, Q2, X, Y, loss = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
+
+                    print(i, loss.item())
+                    clear_output(wait=True)
+                    
+                    MARLAgent.optimizer.zero_grad()
+                    loss.backward()
+                    losses.append(loss.item())
+                    MARLAgent.optimizer.step()
+                    
+                    if j % sync_freq == 0:
+                        target_net.load_state_dict(MARLAgent.model.state_dict())
 
             if done or mov > max_steps:
                 
