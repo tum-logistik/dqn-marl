@@ -40,7 +40,7 @@ def run_marl(MARLAgent,
             # pick agent to play, loop over all agents
             agent_action_indices = np.zeros(MARLAgent.n_agents)
             for n in range(MARLAgent.n_agents):
-                play_prob = MARLAgent.prob_action(state1, 0)
+                play_prob = MARLAgent.prob_action(state1, 0) # passes through the q net (currently global)
 
                 if (random.random() < explore_epsilon):
                     action_ind = np.random.randint(0, MARLAgent.output_size)
@@ -50,21 +50,19 @@ def run_marl(MARLAgent,
                 # Execute action and upate state, and get reward + boolTerminal
                 agent_action_indices[n] = action_ind
             
-            marketEnv.joint_step(agent_action_indices)
-            
-
-            state2_, reward, done, info_dic = marketEnv.step(action)
+            state2_, joint_rewards, done, info_dic = marketEnv.joint_step(agent_action_indices)
             state2 = torch.from_numpy(state2_).float().to(device = devid)
-            exp = (state1, action, reward, state2, done)
+
+            exp = (state1, agent_action_indices, joint_rewards, state2, done)
             
             replay.append(exp)
             state1 = state2
             
-            rewards.append(reward)
+            rewards.append(joint_rewards)
 
             # print out
-            print(action)
-            print(reward)
+            print(agent_action_indices)
+            print(joint_rewards)
             
             if len(replay) > batch_size:
                 minibatch = random.sample(replay, batch_size)

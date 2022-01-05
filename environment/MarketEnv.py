@@ -87,7 +87,6 @@ class MarketEnv():
         demand = np.floor(np.random.poisson(clipped_lambda))        
         
         # different rewards for each agent, based on realized demand
-        
         auction_counts = self.auction_system(action_values, demand)
 
         # reward = set_price * demand
@@ -97,22 +96,20 @@ class MarketEnv():
             if inventories[i] < 0:
                 actionable_actions[i] = self.current_state[0:self.n_agents][i] # sold out, take previous inventory
                 inventories[i] = 0
-
         
-
         rewards = np.multiply(actionable_actions, action_values+1) # limit min sale price to 1
-
 
         # state update, reminder last index = set price
         self.current_state[self.n_agents] = set_price
-        if inventories.any  > 0:
+        if inventories.any() > 0:
             inventory_limit = False
             self.current_state[0:self.n_agents] = inventories
             
-            next_state = self.current_state
         else:
             inventory_limit = True
             self.current_state[0:self.n_agents] = self.max_inventory
+        
+        next_state = self.current_state
         
         return next_state, rewards, inventory_limit, dict()
 
