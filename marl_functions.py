@@ -8,54 +8,81 @@ from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn_net import DQNNet
 
-# SA deepQ network will handle exploded MA net.
-N_AGENTS = 2
+def run_marl(MARLAgent, 
+            marketEnv = MarketEnv(action_size = ACTION_DIM), 
+            epochs = EPOCHS, 
+            batch_size = BATCH_SIZE,
+            max_steps = MAX_STEPS,
+            sync_freq = SYNC_FREQ,
+            explore_epsilon = EXPLORE_EPSILON):
 
-VISIT_COUNTER = dict() # dic of (s, a) -> count
-SAS_PROB_DIC = dict() # dic of (s, a) -> count
+    target_net = copy.deepcopy(MARLAgent.model)
+    target_net.load_state_dict(MARLAgent.model.state_dict())
 
-## State representation is a joing state of all inventories... 
-dummy_market = MarketEnv(action_size = ACTION_DIM)
-STATE_SPACE_SIZE = dummy_market.state_space_size
+    episode_rewards = []
+    avg_epoch_rewards = []
+    losses = []
+    j = 0
 
+    for i in range(epochs):
+        state1_ = marketEnv.reset()
+        state1 = torch.from_numpy(state1_).float().to(device = devid)
+        
+        status = 1
+        mov = 0
+        rewards = []
+        
 
+        while(status == 1): 
+            j += 1
+            mov += 1
+            
+            play_prob = MARLAgent.prob_action(state1, marketEnv.n_agents)
 
+            if (random.random() < explore_epsilon):
+                action_ind = np.random.randint(0, MARLAgent.output_size)
+            else:
+                action_ind = np.argmax(play_prob)
+            
+            # Execute action and upate state, and get reward + boolTerminal
+            action = action_ind
+            marketEnv.step(action)
+            state2_, reward, done, info_dic = marketEnv.step(action)
+            state2 = torch.from_numpy(state2_).float().to(device = devid)
+            exp = (state1, action, reward, state2, done)
+            
+            replay.append(exp)
+            state1 = state2
+            
+            rewards.append(reward)
 
+            # print out
+            print(action)
+            print(reward)
+            
+            if len(replay) > batch_size:
+                minibatch = random.sample(replay, batch_size)
+                Q1, Q2, X, Y, loss = DQNModel.batch_update(minibatch, target_net, DQNModel.state_dim)
 
+                print(i, loss.item())
+                clear_output(wait=True)
+                
+                DQNModel.optimizer.zero_grad()
+                loss.backward()
+                losses.append(loss.item())
+                DQNModel.optimizer.step()
+                
+                if j % sync_freq == 0:
+                    target_net.load_state_dict(DQNModel.model.state_dict())
 
-
-# n_agent starts from 0
-def prob_action(s, n_agent, dqn_model, explore_epsilon = EXPLORE_EPSILON, n_agents = N_AGENTS, action_dim = ACTION_DIM, state_dim = STATE_DIM):
-    # Epsilon greedy maximum of Q net
-    q_values = dqn_model(s)
+            if done or mov > max_steps:
+                
+                avg_episode_reward = np.mean(np.array(rewards))
+                clear_output(wait=True)
+                episode_rewards.append(avg_episode_reward)
+                status = 0
+                mov = 0
+                
+        avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[-50:] ))
     
-    if not torch.cuda.is_available():
-        qval_np = q_values.data.numpy()
-    else:
-        qval_np = q_values.data.cpu().numpy()
-    
-    index = n_agent*ACTION_DIM
-    q_slice = qval_np[index:index+ACTION_DIM] # slice of the Q(s, a) output belonging to the n_agent
-    
-    action_ind = np.argmax(q_slice)
-    prob_output = np.ones(len(q_slice)) * (explore_epsilon / (state_dim - 1) )
-    prob_output[action_ind] = 1 - explore_epsilon
-    
-    # if (random.random() < explore_epsilon):
-    #     # action_ind = np.random.randint(0, np.floor(dqn_model.output_size / n_agents))
-    #     action_ind = np.random.randint(0, len(q_slice))
-    # else:
-    #     action_ind = np.argmax(q_slice)
-    # subset q_values of agent
-    return prob_output
-
-def prob_state_trans(s_next, a, s, env, sas_prob_dic = SAS_PROB_DIC):
-    # 1 / |s| (to start)... update to: prob_state_trans() + (1 - prob_state_trans() )/(Num. visit_counter[s][a])
-    env_copy = copy.deepcopy(env)
-    
-    # return sas_prob_dic[]
-
-def state_q():
-    # sum over action space prob_action(s) * Q(s, a)
-    return 1
-
+    return np.array(losses), np.array(episode_rewards), np.array(avg_epoch_rewards)

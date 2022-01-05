@@ -1,19 +1,6 @@
 import numpy as np
 import itertools
 
-
-### Market Specific ###
-
-# String inventory-price to denote state
-# for i in range(dummy_market.max_inventory):
-#     for a in range(ACTION_DIM):
-#         state_id = str(i) + "-" + str(a)
-#         VISIT_COUNTER[state_id] = 0
-#         SAS_PROB_DIC[state_id] = dict()
-#         for SAS_PROB_DIC[state_id]:
-#             SAS_PROB_DIC[state_id]
-### End market specific ###
-
 class MarketEnv():
 
     def __init__(self, action_size, max_demand = 50, demand_slope = 0.5, n_agents = 1, max_inventory = 2500):
@@ -27,6 +14,7 @@ class MarketEnv():
         self.inventory = self.max_inventory
         self.inventory_space_single = np.arange(0, max_inventory)
         self.action_space = np.arange(0, action_size)
+        self.action_space_joint = np.arange(0, action_size * n_agents)
         self.action_size = action_size
         self.action_env_dim = len(self.action_space)
 
@@ -35,37 +23,29 @@ class MarketEnv():
 
         self.max_demand = max_demand
         self.demand_slope = demand_slope
-        self.state_space_size = self.max_inventory * action_size
+        # self.state_space_size = self.max_inventory * action_size
 
-        if n_agents > 1:
-            # self.inventory_space = [list(zip(each_permutation, self.inventory_space_single)) for each_permutation in itertools.permutations(self.inventory_space_single, len(self.inventory_space_single))]
-            # np.array(np.meshgrid(x,y)).T.reshape(-1, 2)
-            comb_arg = [self.inventory_space_single] * self.n_agents
-            self.inventory_space = np.array(np.meshgrid(*comb_arg)).T.reshape(-1, self.n_agents)
+        # State space
+        comb_arg = [self.inventory_space_single] * self.n_agents + [self.action_space] # includes reference price
+        self.state_space = np.array(np.meshgrid(*comb_arg)).T.reshape(-1, self.n_agents + 1)  #.T.reshape(-1, self.n_agents)
+            
+        
+        self.state_space_size = len(self.state_space)
+        
 
-        else:
-            self.inventory_space = self.inventory_space_single
-
-        # String inventory-price to denote state
-        # for a in range(action_size):
-        #     for n in n_agents:
-        #         for i in range(self.max_inventory):
-                    # state_id = repr([i, a]) if n_agents > 1 else 
-
+    # def make_combination(args):
 
     # .seed
     def seed(self, seed):
         return None
     
-    # .action_space
-
     # .reset()
     def reset(self):
         random_ref_price = np.random.uniform(0, self.action_size)
         self.inventory = self.max_inventory
         return np.array([self.inventory, random_ref_price])
     
-    def get_random_price():
+    def get_random_price(self):
         return np.random.uniform(0, self.action_size)
         
     # .step(action)
