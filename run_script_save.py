@@ -7,7 +7,8 @@ BATCH_SIZE = 200
 DQNModel = DQNNet(state_dim = STATE_DIM, 
                   output_size = ACTION_DIM, 
                   hidden_size = 120,
-                  batch_size = BATCH_SIZE)
+                  batch_size = BATCH_SIZE,
+                  n_agents = 1)
 
 marketEnv1 = MarketEnv(action_size = ACTION_DIM)
 

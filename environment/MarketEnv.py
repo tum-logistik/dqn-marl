@@ -111,7 +111,7 @@ class MarketEnv():
         
         next_state = self.current_state
         
-        return next_state, rewards, inventory_limit, dict()
+        return next_state, rewards, [inventory_limit] * self.n_agents, dict()
 
     def auction_system(self, agent_actions, demand):
 

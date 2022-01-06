@@ -9,7 +9,7 @@ from common.properties import *
 from dqn_net import DQNNet
 
 # SA deepQ network will handle exploded MA net.
-N_AGENTS = 2
+N_AGENTS = 3
 
 VISIT_COUNTER = dict() # dic of (s, a) -> count
 SAS_PROB_DIC = dict() # dic of (s, a) -> count
@@ -40,7 +40,8 @@ class MARLAgent(DQNNet):
             gamma = GAMMA, 
             batch_size = BATCH_SIZE,
             loss_fn = DEFAULT_LOSS_FUNC,
-            learning_rate = LEARNING_RATE)
+            learning_rate = LEARNING_RATE,
+            n_agents = env.n_agents)
 
     # n_agent starts from 0
     def prob_action(self, s, n_agent, 

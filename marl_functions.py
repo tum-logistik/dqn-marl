@@ -53,6 +53,9 @@ def run_marl(MARLAgent,
             state2_, joint_rewards, done, info_dic = marketEnv.joint_step(agent_action_indices)
             state2 = torch.from_numpy(state2_).float().to(device = devid)
 
+            # create action long form
+            action_indice_longform = [np.zeros(MARLAgent.nagents) for x in agent_action_indices]
+
             exp = (state1, agent_action_indices, joint_rewards, state2, done)
             
             replay.append(exp)

@@ -15,7 +15,8 @@ class DQNNet():
                 gamma = GAMMA, 
                 batch_size = BATCH_SIZE,
                 loss_fn = DEFAULT_LOSS_FUNC,
-                learning_rate = LEARNING_RATE):
+                learning_rate = LEARNING_RATE,
+                n_agents = 1):
         
         self.model = torch.nn.Sequential(
             torch.nn.Linear(state_dim, hidden_size),
@@ -29,13 +30,16 @@ class DQNNet():
         self.gamma = gamma
         self.batch_size = batch_size
         self.loss_fn = loss_fn
+        self.n_agents = n_agents
     
     def __call__(self, state):
         return self.model(state).to(device = devid)
     
     def batch_update(self, minibatch, target_net, state_dim):
         state1_batch = torch.cat([s1 for (s1,a,r,s2,d) in minibatch]).view(self.batch_size, state_dim).to(device = devid)
+        
         action_batch = torch.tensor([a for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+        
         reward_batch = torch.tensor([r for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
         state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(self.batch_size, state_dim).to(device = devid)
         done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
@@ -45,8 +49,24 @@ class DQNNet():
         with torch.no_grad():
             Q2 = target_net(state2_batch).to(device = devid)
         
-        Q_formula = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
-        Q_net = Q1.gather(dim=1,index=action_batch.long().unsqueeze(dim=1)).squeeze()
+        if self.n_agents > 1:
+            action_space_size = int(self.output_size / self.n_agents)
+            Q2_reshape = torch.reshape(Q2, (self.batch_size, self.n_agents, action_space_size))
+            max_Q2 = torch.max(Q2_reshape, dim = 2)[0]
+            Q_formula = reward_batch + self.gamma * (1-done_batch) * max_Q2
+
+            test1 = action_batch.long().unsqueeze(dim=1)
+
+            test2 = action_batch.apply_(lambda x: [x for x in range(action_batch.shape[1])] )
+
+            Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1) ).squeeze()
+        else:
+            Q_formula = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
+
+            test1 = action_batch.long().unsqueeze(dim=1)
+
+            Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
+        
         loss = self.loss_fn(Q_net, Q_formula.detach())
 
         return Q1, Q2, Q_net, Q_formula, loss
