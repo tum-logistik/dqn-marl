@@ -8,6 +8,12 @@ from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn_net import DQNNet
 
+def build_one_hot(n, size):
+    arr = np.zeros(size)
+    arr[int(n)] = 1
+    return arr
+
+
 def run_marl(MARLAgent, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
             epochs = EPOCHS, 
@@ -43,7 +49,7 @@ def run_marl(MARLAgent,
                 play_prob = MARLAgent.prob_action(state1, 0) # passes through the q net (currently global)
 
                 if (random.random() < explore_epsilon):
-                    action_ind = np.random.randint(0, MARLAgent.output_size)
+                    action_ind = np.random.randint(0, int(MARLAgent.output_size / MARLAgent.n_agents) )
                 else:
                     action_ind = np.argmax(play_prob)
                 
@@ -54,9 +60,9 @@ def run_marl(MARLAgent,
             state2 = torch.from_numpy(state2_).float().to(device = devid)
 
             # create action long form
-            action_indice_longform = [np.zeros(MARLAgent.nagents) for x in agent_action_indices]
+            action_indice_longform = np.array([build_one_hot(x, MARLAgent.action_size) for x in agent_action_indices]).reshape(-1)
 
-            exp = (state1, agent_action_indices, joint_rewards, state2, done)
+            exp = (state1, action_indice_longform, joint_rewards, state2, done)
             
             replay.append(exp)
             state1 = state2
