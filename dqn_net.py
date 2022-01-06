@@ -54,12 +54,8 @@ class DQNNet():
             Q2_reshape = torch.reshape(Q2, (self.batch_size, self.n_agents, action_space_size))
             max_Q2 = torch.max(Q2_reshape, dim = 2)[0]
             Q_formula = reward_batch + self.gamma * (1-done_batch) * max_Q2
-
-            # Multiply out reward to everybody
-
-
-
-            Q1_joint = Q1.gather(dim=1, index=action_batch.type(torch.int64)).squeeze()
+            
+            # Q1_joint = Q1.gather(dim=1, index=action_batch.type(torch.int64)).squeeze()
             Q1_reshape = torch.reshape(Q1, (self.batch_size, self.n_agents, action_space_size))
             Q_net = torch.max(Q1_reshape, dim = 2)[0]
 
