@@ -33,11 +33,7 @@ class MarketEnv():
             
         
         self.state_space_size = len(self.state_space)
-        
-
-    # def make_combination(args):
-
-    # .seed
+    
     def seed(self, seed):
         return None
     
@@ -126,9 +122,6 @@ class MarketEnv():
             auction_win_agent[vi] += 1
         
         return auction_win_agent
-            
-
-
-
+    
     def price_translate_from_index(self, i):
         return float(i)

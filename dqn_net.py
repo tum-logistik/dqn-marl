@@ -61,9 +61,6 @@ class DQNNet():
 
         else:
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
-
-            test1 = action_batch.long().unsqueeze(dim=1)
-
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
         
         loss = self.loss_fn(Q_net, Q_formula.detach())
