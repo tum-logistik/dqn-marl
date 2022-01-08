@@ -15,13 +15,13 @@ marketEnv1 = MarketEnv(action_size = ACTION_DIM)
 losses, episode_rewards, epoch_rewards = run_dqn(DQNModel, 
                                                  marketEnv = marketEnv1,
                                                  batch_size = BATCH_SIZE,
-                                                 epochs = 4000,
+                                                 epochs = 4001,
                                                  explore_epsilon = 0.2,
                                                  max_steps = 100,
                                                  sync_freq = 10)
 
 
-env_id = "market-4000"
+env_id = "market-4001"
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, losses)
 np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, epoch_rewards)
 
@@ -56,7 +56,7 @@ plt.plot(epoch_rewards)
 plt.plot(epoch_rewards_eval)
 plt.xlabel("Epochs",fontsize=22)
 plt.ylabel("Avg Reward",fontsize=22)
-# plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
+plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
 
 np.mean(epoch_rewards_eval)
 
