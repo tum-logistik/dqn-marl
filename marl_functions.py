@@ -20,13 +20,20 @@ def run_marl(MARLAgent,
             batch_size = BATCH_SIZE,
             max_steps = MAX_STEPS,
             sync_freq = SYNC_FREQ,
-            explore_epsilon = EXPLORE_EPSILON):
+            explore_epsilon = EXPLORE_EPSILON,
+            agent_index = 0):
 
     target_net = copy.deepcopy(MARLAgent.model)
     target_net.load_state_dict(MARLAgent.model.state_dict())
 
     episode_rewards = []
+    episode_rewards_sum = []
+    episode_rewards_agent = []
+
     avg_epoch_rewards = []
+    avg_epoch_rewards_sum = []
+    avg_epoch_rewards_agent = []
+
     losses = []
     j = 0
 
@@ -38,7 +45,6 @@ def run_marl(MARLAgent,
         mov = 0
         rewards = []
         
-
         while(status == 1): 
             j += 1
             mov += 1
@@ -75,7 +81,7 @@ def run_marl(MARLAgent,
             
             if len(replay) > batch_size:
                 minibatch = random.sample(replay, batch_size)
-                Q1, Q2, X, Y, loss = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
+                Q1, Q2, X, Y, loss = MARLAgent.batch_update_competitive(minibatch, target_net, MARLAgent.state_dim)
 
                 print(i, loss.item())
                 clear_output(wait=True)
@@ -91,11 +97,20 @@ def run_marl(MARLAgent,
             if done or mov > max_steps:
                 
                 avg_episode_reward = np.mean(np.array(rewards))
+                sum_episode_reward = np.sum(np.array(rewards))
+                agent_episode_reward = np.array(rewards)[agent_index] # single agent reward (agent of interest)
                 clear_output(wait=True)
                 episode_rewards.append(avg_episode_reward)
+                episode_rewards_sum.append(sum_episode_reward)
+                episode_rewards_agent.append(agent_episode_reward)
                 status = 0
                 mov = 0
-                
-        avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[-50:] ))
+        
+        smoothing_factor = -50
+        avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
+        avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
+        avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:] ))
+
+
     
-    return np.array(losses), np.array(episode_rewards), np.array(avg_epoch_rewards)
+    return np.array(losses), np.array(episode_rewards), np.array(avg_epoch_rewards), np.array(avg_epoch_rewards_sum), np.array(avg_epoch_rewards_agent)
