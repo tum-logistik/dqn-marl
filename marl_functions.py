@@ -81,7 +81,7 @@ def run_marl(MARLAgent,
             
             if len(replay) > batch_size:
                 minibatch = random.sample(replay, batch_size)
-                Q1, Q2, X, Y, loss = MARLAgent.batch_update_competitive(minibatch, target_net, MARLAgent.state_dim)
+                Q1, Q2, X, Y, loss = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
 
                 print(i, loss.item())
                 clear_output(wait=True)
