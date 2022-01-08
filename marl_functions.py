@@ -110,7 +110,5 @@ def run_marl(MARLAgent,
         avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
         avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
         avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:] ))
-
-
     
     return np.array(losses), np.array(episode_rewards), np.array(avg_epoch_rewards), np.array(avg_epoch_rewards_sum), np.array(avg_epoch_rewards_agent)
