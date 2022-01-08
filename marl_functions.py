@@ -98,7 +98,7 @@ def run_marl(MARLAgent,
                 
                 avg_episode_reward = np.mean(np.array(rewards))
                 sum_episode_reward = np.sum(np.array(rewards))
-                agent_episode_reward = np.array(rewards)[agent_index] # single agent reward (agent of interest)
+                agent_episode_reward = np.array(rewards)[-1][agent_index] # single agent reward (agent of interest)
                 clear_output(wait=True)
                 episode_rewards.append(avg_episode_reward)
                 episode_rewards_sum.append(sum_episode_reward)
