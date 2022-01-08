@@ -20,6 +20,7 @@ class MARLAgent(DQNNet):
         self.s_trans_prob = dict()
         self.n_agents = env.n_agents
         self.action_size = env.action_size
+        self.state_dim = self.n_agents + 1
         
         self.joint_action_size = env.action_size * env.n_agents
         
@@ -44,10 +45,10 @@ class MARLAgent(DQNNet):
 
     # n_agent starts from 0
     def prob_action(self, s, n_agent, 
-            explore_epsilon = EXPLORE_EPSILON, 
-            state_dim = STATE_DIM):
+            explore_epsilon = EXPLORE_EPSILON):
         # Epsilon greedy maximum of Q net
         q_values = self(s)
+        joint_state_dim = self.state_dim
         
         if not torch.cuda.is_available():
             qval_np = q_values.data.numpy()
@@ -58,7 +59,7 @@ class MARLAgent(DQNNet):
         q_slice = qval_np[index:index+self.action_size] # slice of the Q(s, a) output belonging to the n_agent
         
         action_ind = np.argmax(q_slice)
-        prob_output = np.ones(len(q_slice)) * (explore_epsilon / (state_dim - 1) )
+        prob_output = np.ones(len(q_slice)) * (explore_epsilon / (self.state_dim - 1) )
         prob_output[action_ind] = 1 - explore_epsilon
         
         joint_action_prob = np.zeros(self.joint_action_size)

@@ -3,8 +3,6 @@ import numpy as np
 from marl_functions import *
 from marl_agent import *
 
-# BATCH_SIZE = 200
-
 env = MarketEnv(action_size = 4, 
                     n_agents = 2, 
                     max_inventory = 3, 
@@ -16,10 +14,10 @@ marl_agent = MARLAgent(env)
 losses, episode_rewards, epoch_rewards, global_rewards, agent_rewards = run_marl(marl_agent, 
                                                                                 marketEnv = env,
                                                                                 batch_size = BATCH_SIZE,
-                                                                                epochs = 199,
-                                                                                explore_epsilon = 0.2,
-                                                                                max_steps = 10,
-                                                                                sync_freq = 10,
+                                                                                epochs = EPOCHS,
+                                                                                explore_epsilon = EXPLORE_EPSILON,
+                                                                                max_steps = MAX_STEPS,
+                                                                                sync_freq = SYNC_FREQ,
                                                                                 agent_index = 0)
 
 env_id = "market-marl-40"
