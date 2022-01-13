@@ -113,7 +113,7 @@ class MarketEnv():
 
         # assume indices is price value
         # new_ref_price = np.min(agent_actions)
-        win_probs = np.exp(agent_actions)/np.sum(np.exp(agent_actions))
+        win_probs = 1 - np.exp(agent_actions)/np.sum(np.exp(agent_actions))
         agent_ids = np.arange(0, len(agent_actions))
         auction_win_agent = np.zeros(len(agent_actions))
 
