@@ -5,7 +5,7 @@ import itertools
 
 class MarketEnv():
 
-    def __init__(self, action_size, max_demand = 50, demand_slope = 0.5, n_agents = 1, max_inventory = 2500):
+    def __init__(self, action_size, max_demand = 50, demand_slope = 0.5, n_agents = 1, max_inventory = 2500, max_belief = 1):
         # MARL parameters
         self.visit_counter = dict()
         self.n_agents = n_agents
@@ -33,6 +33,8 @@ class MarketEnv():
             
         
         self.state_space_size = len(self.state_space)
+
+        self.max_belief = max_belief
     
     def seed(self, seed):
         return None
@@ -75,7 +77,7 @@ class MarketEnv():
         
         # previous_ref_price = self.current_state[-1]
         action_values = action_indices # special case
-        selected_joint_act_index = int(np.min(action_values)) # minimum or average or any other function, current or previous time
+        selected_joint_act_index = int(np.max(action_values)) # refernce price: **minimum or average or any other function**, current or previous time
         set_price = self.action_space[selected_joint_act_index]
         demand_lambda = self.max_demand - self.demand_slope*set_price
 
@@ -109,11 +111,20 @@ class MarketEnv():
         
         return next_state, rewards, [inventory_limit] * self.n_agents, dict()
 
+    def map_belief(self, x):
+            x_intercept = self.max_demand / self.demand_slope
+            belief_slope = self.max_belief / x_intercept
+            return self.max_belief - belief_slope*x
+
     def auction_system(self, agent_actions, demand):
 
         # assume indices is price value
         # new_ref_price = np.min(agent_actions)
-        win_probs = 1 - np.exp(agent_actions)/np.sum(np.exp(agent_actions))
+        
+        belief_func_vec = np.vectorize(self.map_belief)
+        agent_beliefs = belief_func_vec(agent_actions)
+
+        win_probs = np.exp(agent_beliefs)/np.sum(np.exp(agent_beliefs))
         agent_ids = np.arange(0, len(agent_actions))
         auction_win_agent = np.zeros(len(agent_actions))
 
