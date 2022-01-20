@@ -2,7 +2,6 @@ import numpy as np
 import torch
 from IPython.display import clear_output
 import random
-from matplotlib import pylab as plt
 from collections import deque
 import copy
 
@@ -12,13 +11,13 @@ else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-BATCH_SIZE = 400
+BATCH_SIZE = 204
 
 # DQN Iterative Parameters
 EPOCHS = 4000
 EXPLORE_EPSILON = 0.1
 MAX_STEPS = 25
-SYNC_FREQ = 40
+SYNC_FREQ = 99
 MEM_SIZE = 500
 replay = deque(maxlen = MEM_SIZE)
 
@@ -28,3 +27,6 @@ GAMMA = 0.8
 DEFAULT_LOSS_FUNC = torch.nn.MSELoss()
 LEARNING_RATE = 1e-3
 
+# MDP Parameters
+ACTION_DIM = 301
+STATE_DIM = 2

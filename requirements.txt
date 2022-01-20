@@ -30,3 +30,4 @@ torch==1.9.0
 traitlets==4.3.2
 urllib3==1.23
 wcwidth==0.1.7
+scipy==1.7.3
