@@ -30,7 +30,7 @@ class MarketEnv():
         # State space
         comb_arg = [self.inventory_space_single] * self.n_agents + [self.action_space] # includes reference price
         self.state_space = np.array(np.meshgrid(*comb_arg)).T.reshape(-1, self.n_agents + 1)  #.T.reshape(-1, self.n_agents)
-            
+        
         
         self.state_space_size = len(self.state_space)
 

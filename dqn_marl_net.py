@@ -8,9 +8,9 @@ from collections import deque
 from environment.MarketEnv import MarketEnv
 from common.properties import *
 
-class DQNNet():
+class DQNMARLNet():
 
-    def __init__(self, state_dim, output_size, 
+    def __init__(self, state_size, action_space_size, output_size, 
                 hidden_size = HIDDEN_SIZE, 
                 gamma = GAMMA, 
                 batch_size = BATCH_SIZE,
@@ -19,14 +19,15 @@ class DQNNet():
                 n_agents = 1):
         
         self.model = torch.nn.Sequential(
-            torch.nn.Linear(state_dim, hidden_size),
+            torch.nn.Linear(state_size + action_space_size, hidden_size),
             torch.nn.ReLU(),
             torch.nn.Linear(hidden_size, hidden_size),
             torch.nn.ReLU(),
             torch.nn.Linear(hidden_size,output_size)).to(device = devid)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
         self.output_size = output_size
-        self.state_dim = state_dim
+        self.state_dim = state_size
+        self.action_space_size = action_space_size
         self.gamma = gamma
         self.batch_size = batch_size
         self.loss_fn = loss_fn
@@ -42,35 +43,8 @@ class DQNNet():
         state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(self.batch_size, state_dim).to(device = devid)
         done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
         return state1_batch, action_batch, reward_batch, state2_batch, done_batch
-    
-    def batch_update(self, minibatch, target_net, state_dim): # cooperative update MA
 
-        state1_batch, action_batch, reward_batch, state2_batch, done_batch = self.extract_mini_batch(minibatch, state_dim)
-        
-        # Q update
-        Q1 = self(state1_batch).to(device = devid)
-        with torch.no_grad():
-            Q2 = target_net(state2_batch).to(device = devid)
-        
-        if self.n_agents > 1:
-            action_space_size = int(self.output_size / self.n_agents)
-            Q2_reshape = torch.reshape(Q2, (self.batch_size, self.n_agents, action_space_size))
-            max_Q2 = torch.max(Q2_reshape, dim = 2)[0]
-            Q_formula = reward_batch + self.gamma * (1-done_batch) * max_Q2
-            
-            # Q1_joint = Q1.gather(dim=1, index=action_batch.type(torch.int64)).squeeze()
-            Q1_reshape = torch.reshape(Q1, (self.batch_size, self.n_agents, action_space_size))
-            Q_net = torch.max(Q1_reshape, dim = 2)[0]
-
-        else:
-            Q_formula = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
-            Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
-        
-        loss = self.loss_fn(Q_net, Q_formula.detach())
-
-        return Q1, Q2, Q_net, Q_formula, loss
-
-    def batch_update_competitive(self, minibatch, target_net, state_dim, agent_index = 0):
+    def batch_update(self, minibatch, target_net, state_dim, agent_index = 0):
 
         state1_batch, action_batch, reward_batch, state2_batch, done_batch = self.extract_mini_batch(minibatch, state_dim)
 
@@ -80,14 +54,15 @@ class DQNNet():
             Q2 = target_net(state2_batch).to(device = devid)
         
         if self.n_agents > 1:
-            action_space_size = int(self.output_size / self.n_agents)
-            Q2_reshape = torch.reshape(Q2, (self.batch_size, self.n_agents, action_space_size))
-            Q2_reshape_N_agent = Q2_reshape[:, agent_index, :]
-            max_Q2 = torch.max(Q2_reshape_N_agent, dim = 1)[0]
-            Q_formula = reward_batch[:, agent_index] + self.gamma * (1-done_batch[:, agent_index]) * max_Q2 # Update change with NashQ
+            Q2_reshape = torch.reshape(Q2, (self.batch_size, self.n_agents))
+            
+            # Q2_reshape_N_agent = Q2_reshape[:, agent_index]
+            # max_Q2 = torch.max(Q2_reshape_N_agent, dim = 1)[0]
+
+            Q_formula = reward_batch + self.gamma * (1-done_batch) * nash_Q2 # Update change with NashQ
             
             # Q1_joint = Q1.gather(dim=1, index=action_batch.type(torch.int64)).squeeze()
-            Q1_reshape = torch.reshape(Q1, (self.batch_size, self.n_agents, action_space_size))
+            Q1_reshape = torch.reshape(Q1, (self.batch_size, self.n_agents, self.action_space_size))
             Q1_reshape_N_agent = Q1_reshape[:, agent_index, :]
             Q_net = torch.max(Q1_reshape_N_agent, dim = 1)[0]
         else:
