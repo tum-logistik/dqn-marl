@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.spatial import ConvexHull, convex_hull_plot_2d
 
 # create polynomial convex function
 def convex_poly_func(x_vals, theo_max = 100, theo_opt_x = 50, senstivity = 0.01):

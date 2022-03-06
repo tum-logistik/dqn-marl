@@ -1,5 +1,6 @@
 import math
 from collections import MutableMapping
+import copy
 
 # implementation from here: https://stackoverflow.com/questions/53138434/use-range-as-a-key-value-in-a-dictionary-most-efficient-way
 
@@ -84,5 +85,20 @@ class RangeMap(MutableMapping):
 
 class RangeMapDict(RangeMap):
     def __init__(self, dic):
+        
         self.range_dic = dic
-        self.range_map = RangeMap(dic)
+        self.range_dic_perc = copy.deepcopy(self.range_dic)
+        self.max_val = max([k[1] for k in self.range_dic.keys()])
+
+        for k in list(self.range_dic_perc.keys()):    
+            self.range_dic_perc[tuple(ti/self.max_val for ti in k)] = self.range_dic_perc.pop(k)
+
+        self.range_map = RangeMap(self.range_dic_perc)
+
+    def __getitem__(self, v):
+        if v/self.max_val < 0:
+            return self.range_map[0]
+        if v/self.max_val > 0.99:
+            return self.range_map[0.99]
+        else:
+            return self.range_map[v/self.max_val]
