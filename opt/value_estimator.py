@@ -14,7 +14,7 @@ def policy_scalar(env, sna_policy_dict, joint_actions, state):
     return prob_scalar
 
 
-def value_search_sample_policy(env, sna_policy_dict, max_iter = 999):
+def value_search_sample_policy(env, sna_policy_dict, max_iter = 999, q_func_callback = convex_q_gen):
 
     value_vector = np.zeros(env.state_space_size)
     joint_action_vector = np.zeros([env.state_space_size, env.n_agents])
@@ -27,7 +27,7 @@ def value_search_sample_policy(env, sna_policy_dict, max_iter = 999):
             rand_joint_actions = np.random.choice(env.action_space, env.n_agents) # can be more efficient search over a
             state_key = repr(list(env.state_space[s]))
             pol_scal = policy_scalar(env, sna_policy_dict, rand_joint_actions, state_key)
-            candidate_val = pol_scal * convex_q_gen(s, rand_joint_actions)
+            candidate_val = pol_scal * q_func_callback(s, rand_joint_actions)
             if candidate_val > max_val:
                 max_val = candidate_val
                 best_joint_action = rand_joint_actions
