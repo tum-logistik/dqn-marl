@@ -9,6 +9,6 @@ def convex_poly_func(x_vals, theo_max = 100, theo_opt_x = 50, senstivity = 0.01)
 
 def convex_q_gen(s, a):
     q_val = convex_poly_func(a)
-    noise = np.clip(np.random.normal(5,2,1)[0], 0, 100)
+    noise = np.clip(np.random.normal(0,2,1)[0], -10, 10)
     return q_val + noise
 
