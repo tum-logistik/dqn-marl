@@ -2,7 +2,7 @@ from common.RangeMap import *
 import numpy as np
 from opt.pseudo_q_generator import *
 import itertools
-list(itertools.permutations([1, 2, 3]))
+# list(itertools.permutations([1, 2, 3]))
 
 # policy represented by numerical increment mapping to probabilities
 
