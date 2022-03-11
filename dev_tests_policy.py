@@ -26,5 +26,15 @@ range_dict = {
 
 policy_dic = RangeMapDict(range_dict)
 
-perturb_policy(policy_dic)
+# s -> n -> a
+na_policy_dict = dict()
+for n in range(marketEnv.n_agents):
+    na_policy_dict[n] = policy_dic
 
+# everyone same policy
+sna_policy_dict = dict()
+for s in range(marketEnv.state_space_size):
+    key = repr(list(marketEnv.state_space[s]))
+    sna_policy_dict[key] = na_policy_dict
+
+epsilon, value_cur_policy = sim_anneal_optimize(marketEnv, sna_policy_dict)

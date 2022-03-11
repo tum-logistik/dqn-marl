@@ -61,9 +61,9 @@ def perturb_policy(policy_dic_range_dic, st_dev = 0.03):
     
     return policy_dic_range_dic
 
-def sim_anneal_optimize(env, sna_policy_dict, k_max = 999):
+def sim_anneal_optimize(env, sna_policy_dict, k_max = 99):
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
-    value_initial_policy = value_search_sample_policy(env, sna_policy_dict_iter)
+    value_initial_policy = value_search_sample_policy_approx(env, sna_policy_dict_iter)
     value_cur_policy = value_initial_policy
     for k in range(k_max):
         T = temp_func(k, k_max)
@@ -73,7 +73,7 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = 999):
             for n in range(env.n_agents):
                 sna_policy_dict_candidate[state_key][n] = perturb_policy(sna_policy_dict_iter[state_key][n])
 
-        value_candidate_policy = value_search_sample_policy(env, sna_policy_dict_candidate)
+        value_candidate_policy = value_search_sample_policy_approx(env, sna_policy_dict_candidate)
 
         if accept_prob(value_cur_policy, value_candidate_policy, T) > np.random.uniform(0, 1):
             sna_policy_dict_iter = sna_policy_dict_candidate

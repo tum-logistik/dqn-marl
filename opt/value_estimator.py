@@ -16,7 +16,7 @@ def policy_scalar(env, sna_policy_dict, joint_actions, state):
     return prob_scalar
 
 
-def value_search_sample_policy_approx(env, sna_policy_dict, max_iter = 999, q_func_callback = convex_q_gen):
+def value_search_sample_policy_approx(env, sna_policy_dict, max_iter = 99, q_func_callback = convex_q_gen):
 
     value_vector = np.zeros(env.state_space_size)
     joint_action_vector = np.zeros([env.state_space_size, env.n_agents])
