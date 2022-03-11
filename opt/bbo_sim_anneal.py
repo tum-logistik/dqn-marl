@@ -6,10 +6,10 @@ def temp_func(k, k_max, const = 3.0):
     return const * np.exp(1 - ((k+1)/k_max))
 
 def accept_prob(value_cur_policy, value_candidate_policy, T):
-    if value_cur_policy > value_candidate_policy:
+    if all(value_cur_policy > value_candidate_policy):
         acc_prob = 1
     else:
-        acc_prob = np.exp(-(value_candidate_policy - value_cur_policy)/T)    
+        acc_prob = np.exp(-(np.sum(value_candidate_policy) - np.sum(value_cur_policy))/T)    
     return acc_prob
 
 def perturb_policy(policy_dic_range_dic, st_dev = 0.03):
@@ -67,7 +67,12 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = 999):
     value_cur_policy = value_initial_policy
     for k in range(k_max):
         T = temp_func(k, k_max)
-        sna_policy_dict_candidate = neighbour_func(sna_policy_dict_iter)
+        sna_policy_dict_candidate = copy.deepcopy(sna_policy_dict_iter)
+        for state in range(env.state_space):
+            state_key = repr(list(state))
+            for n in range(env.n_agents):
+                sna_policy_dict_candidate[state_key][n] = perturb_policy(sna_policy_dict_iter[state_key][n])
+
         value_candidate_policy = value_search_sample_policy(env, sna_policy_dict_candidate)
 
         if accept_prob(value_cur_policy, value_candidate_policy, T) > np.random.uniform(0, 1):
