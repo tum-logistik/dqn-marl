@@ -6,14 +6,14 @@ def temp_func(k, k_max, const = 3.0):
     return const * np.exp(1 - ((k+1)/k_max))
 
 def accept_prob(value_cur_policy, value_candidate_policy, T):
-    if all(value_cur_policy > value_candidate_policy):
+    if (value_cur_policy >= value_candidate_policy).all():
         acc_prob = 1
     else:
         acc_prob = np.exp(-(np.sum(value_candidate_policy) - np.sum(value_cur_policy))/T)    
     return acc_prob
 
-def perturb_policy(policy_dic_range_dic, st_dev = 0.03):
-    alt_dic = copy.deepcopy(policy_dic_range_dic)
+def perturb_policy(policy_dic, st_dev = 0.03):
+    alt_dic = copy.deepcopy(policy_dic.range_dic)
     noise_sum =  0
     
     for k in alt_dic.keys():
@@ -57,23 +57,23 @@ def perturb_policy(policy_dic_range_dic, st_dev = 0.03):
                 break
     
     if all(v >= 0.0 for v in alt_dic.values()) and np.sum(list(alt_dic.values())) < 1.001:
-        return alt_dic
+        return RangeMapDict(alt_dic)
     
-    return policy_dic_range_dic
+    return policy_dic
 
-def sim_anneal_optimize(env, sna_policy_dict, k_max = 99):
+def sim_anneal_optimize(env, sna_policy_dict, k_max = 9):
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
-    value_initial_policy = value_search_sample_policy_approx(env, sna_policy_dict_iter)
+    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter)
     value_cur_policy = value_initial_policy
     for k in range(k_max):
         T = temp_func(k, k_max)
         sna_policy_dict_candidate = copy.deepcopy(sna_policy_dict_iter)
-        for state in range(env.state_space):
+        for state in env.state_space:
             state_key = repr(list(state))
             for n in range(env.n_agents):
                 sna_policy_dict_candidate[state_key][n] = perturb_policy(sna_policy_dict_iter[state_key][n])
 
-        value_candidate_policy = value_search_sample_policy_approx(env, sna_policy_dict_candidate)
+        value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate)
 
         if accept_prob(value_cur_policy, value_candidate_policy, T) > np.random.uniform(0, 1):
             sna_policy_dict_iter = sna_policy_dict_candidate

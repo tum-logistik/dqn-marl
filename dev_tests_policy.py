@@ -6,10 +6,10 @@ from opt.bbo_sim_anneal import *
 
 
 STATE_DIM = 2
-ACTION_DIM = 11
+ACTION_DIM = 4
 BATCH_SIZE = 200
 
-marketEnv = MarketEnv(action_size = ACTION_DIM, max_price = 100, max_inventory = 5, n_agents = 3)
+marketEnv = MarketEnv(action_size = ACTION_DIM, max_price = 100, max_inventory = 2, n_agents = 3)
 
 range_dict = {
     (0, 10): 0.10,

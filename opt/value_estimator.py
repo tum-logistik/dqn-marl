@@ -12,7 +12,8 @@ def policy_scalar(env, sna_policy_dict, joint_actions, state):
     policy_dict = sna_policy_dict[state]
 
     for n in range(env.n_agents):
-        prob_scalar *= policy_dict[n][int(joint_actions[n])]
+        n_action = int(joint_actions[n])
+        prob_scalar *= policy_dict[n][n_action]
     return prob_scalar
 
 
