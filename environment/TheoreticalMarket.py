@@ -14,9 +14,9 @@ class TheoreticalMarket():
         self.ref_p = ref_p
     
     def demand_func(self, x):
-        candidate_demand = self.beta0 + self.beta1*x + self.beta2*x - self.c_n * self.ref_p
-        return candidate_demand
-        # return np.max([0.0, candidate_demand])
+        candidate_demand = self.beta0 + self.beta1*x + self.beta2*x + self.c_n
+        # return candidate_demand
+        return np.max([0.0, candidate_demand])
     
     def exp1minus_func(self, x):
         return 1 - self.a * x
