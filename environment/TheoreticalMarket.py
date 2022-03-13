@@ -1,8 +1,5 @@
 import numpy as np
 
-
-
-
 class TheoreticalMarket():
     def __init__(self,beta0 = 1, beta1 = -2, beta2 = -3, a = 0.03, ref_p = 1.5):
         self.beta0 = beta0

@@ -1,4 +1,4 @@
-from dqn_functions import * 
+from dqn.dqn_functions import * 
 
 STATE_DIM = 2
 ACTION_DIM = 110
