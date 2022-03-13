@@ -1,7 +1,7 @@
 from re import S
 import numpy as np
-from marl_functions import *
-from marl_agent import *
+from dqn.marl_functions import *
+from dqn.marl_agent import *
 
 env = MarketEnv(action_size = 4, 
                     n_agents = 2, 

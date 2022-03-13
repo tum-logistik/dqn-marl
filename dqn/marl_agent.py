@@ -6,7 +6,7 @@ from collections import deque
 from tests.test_gw import *
 from environment.MarketEnv import MarketEnv
 from common.properties import *
-from dqn_net import DQNNet
+from dqn.dqn_net import DQNNet
 
 VISIT_COUNTER = dict() # dic of (s, a) -> count
 SAS_PROB_DIC = dict() # dic of (s, a) -> count

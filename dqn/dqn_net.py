@@ -84,14 +84,14 @@ class DQNNet():
             Q2_reshape = torch.reshape(Q2, (self.batch_size, self.n_agents, action_space_size))
             Q2_reshape_N_agent = Q2_reshape[:, agent_index, :]
             max_Q2 = torch.max(Q2_reshape_N_agent, dim = 1)[0]
-            Q_formula = reward_batch[:, agent_index] + self.gamma * (1-done_batch[:, agent_index]) * max_Q2
+            Q_formula = reward_batch[:, agent_index] + self.gamma * (1-done_batch[:, agent_index]) * max_Q2 # Update change with NashQ
             
             # Q1_joint = Q1.gather(dim=1, index=action_batch.type(torch.int64)).squeeze()
             Q1_reshape = torch.reshape(Q1, (self.batch_size, self.n_agents, action_space_size))
             Q1_reshape_N_agent = Q1_reshape[:, agent_index, :]
             Q_net = torch.max(Q1_reshape_N_agent, dim = 1)[0]
         else:
-            Q_formula = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0])
+            Q_formula = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0]) # Update change with NashQ
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
         
         loss = self.loss_fn(Q_net, Q_formula.detach())

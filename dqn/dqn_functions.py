@@ -8,7 +8,7 @@ from collections import deque
 from tests.test_gw import *
 from environment.MarketEnv import MarketEnv
 from common.properties import *
-from dqn_net import DQNNet
+from dqn.dqn_net import DQNNet
 
 DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
