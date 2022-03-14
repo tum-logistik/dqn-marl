@@ -11,7 +11,7 @@ env = MarketEnv(action_size = 10,
 
 marl_agent = MARLAgent(env)
 
-losses, episode_rewards, epoch_rewards, global_rewards, agent_rewards = run_marl(marl_agent, 
+episode_rewards, epoch_rewards, global_rewards, agent_rewards, losses, losses_nash  = run_marl(marl_agent, 
                                                                                 marketEnv = env,
                                                                                 batch_size = BATCH_SIZE,
                                                                                 epochs = EPOCHS,
