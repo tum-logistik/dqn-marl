@@ -20,7 +20,7 @@ losses, episode_rewards, epoch_rewards, global_rewards, agent_rewards = run_marl
                                                                                 sync_freq = SYNC_FREQ,
                                                                                 agent_index = 0)
 
-env_id = "market-marl-40"
+env_id = "market-marl-nash"
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, losses)
 np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, epoch_rewards)
 
