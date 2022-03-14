@@ -51,13 +51,14 @@ def run_marl(MARLAgent,
             j += 1
             mov += 1
             
+            
             # pick agent to play, loop over all agents
             agent_action_indices = np.zeros(MARLAgent.n_agents)
             for n in range(MARLAgent.n_agents):
                 play_prob = MARLAgent.prob_action(state1) # passes through the q net (currently global)
 
                 action_ind = np.random.choice(np.arange(0, marketEnv.action_size ), p=play_prob)
-                
+
                 # Execute action and upate state, and get reward + boolTerminal
                 agent_action_indices[n] = action_ind
             
