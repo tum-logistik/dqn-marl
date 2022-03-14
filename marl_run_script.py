@@ -4,8 +4,8 @@ from dqn.marl_functions import *
 from dqn.marl_agent import *
 
 env = MarketEnv(action_size = 4, 
-                    n_agents = 2, 
-                    max_inventory = 3, 
+                    n_agents = 3, 
+                    max_inventory = 1, 
                     max_demand = 3, 
                     demand_slope = 0.75)
 

@@ -13,7 +13,6 @@ def build_one_hot(n, size):
     arr[int(n)] = 1
     return arr
 
-
 def run_marl(MARLAgent, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
             epochs = EPOCHS, 
@@ -23,9 +22,12 @@ def run_marl(MARLAgent,
             explore_epsilon = EXPLORE_EPSILON,
             agent_index = 0):
 
-    target_net = copy.deepcopy(MARLAgent.model)
-    target_net.load_state_dict(MARLAgent.model.state_dict())
-
+    marl_agent_list = []
+    for a in range(marketEnv.n_agents):
+        target_net = copy.deepcopy(MARLAgent.model)
+        target_net.load_state_dict(MARLAgent.model.state_dict())
+        marl_agent_list.append(target_net)
+    
     episode_rewards = []
     episode_rewards_sum = []
     episode_rewards_agent = []
@@ -52,12 +54,12 @@ def run_marl(MARLAgent,
             # pick agent to play, loop over all agents
             agent_action_indices = np.zeros(MARLAgent.n_agents)
             for n in range(MARLAgent.n_agents):
-                play_prob = MARLAgent.prob_action(state1, 0) # passes through the q net (currently global)
+                play_prob = MARLAgent.prob_action(state1) # passes through the q net (currently global)
 
                 if (random.random() < explore_epsilon):
-                    action_ind = np.random.randint(0, int(MARLAgent.output_size / MARLAgent.n_agents) )
+                    action_ind = np.random.randint(0, int(MARLAgent.output_size / MARLAgent.n_agents))
                 else:
-                    action_ind = np.argmax(play_prob)
+                    action_ind = np.argmax(play_prob) # Use Approx Nash Eq. finder
                 
                 # Execute action and upate state, and get reward + boolTerminal
                 agent_action_indices[n] = action_ind
@@ -109,6 +111,6 @@ def run_marl(MARLAgent,
         smoothing_factor = -50
         avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
         avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
-        avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:] ))
+        avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
     
     return np.array(losses), np.array(episode_rewards), np.array(avg_epoch_rewards), np.array(avg_epoch_rewards_sum), np.array(avg_epoch_rewards_agent)

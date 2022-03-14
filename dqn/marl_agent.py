@@ -35,7 +35,8 @@ class MARLAgent(DQNNet):
                 for s2 in env.state_space:    
                     self.s_trans_prob[repr([s, a, s2])] = 1 / env.state_space_size
         
-        super(MARLAgent, self).__init__(env.state_env_dim, self.joint_action_size, 
+        super(MARLAgent, self).__init__(env.state_env_dim, 
+            np.power(self.action_size, self.n_agents), 
             hidden_size = HIDDEN_SIZE, 
             gamma = GAMMA, 
             batch_size = BATCH_SIZE,
@@ -44,28 +45,53 @@ class MARLAgent(DQNNet):
             n_agents = env.n_agents)
 
     # n_agent starts from 0
-    def prob_action(self, s, n_agent, 
-            explore_epsilon = EXPLORE_EPSILON):
+    def prob_action(self, s, explore_epsilon = EXPLORE_EPSILON):
         # Epsilon greedy maximum of Q net
         q_values = self(s)
-        joint_state_dim = self.state_dim
-        
+
         if not torch.cuda.is_available():
             qval_np = q_values.data.numpy()
         else:
             qval_np = q_values.data.cpu().numpy()
         
-        index = n_agent*self.action_size
-        q_slice = qval_np[index:index+self.action_size] # slice of the Q(s, a) output belonging to the n_agent
-        
-        action_ind = np.argmax(q_slice)
-        prob_output = np.ones(len(q_slice)) * (explore_epsilon / (self.state_dim - 1) )
+        action_ind = np.argmax(qval_np)
+        prob_output = np.ones(len(qval_np)) * (explore_epsilon / (self.state_dim - 1) )
         prob_output[action_ind] = 1 - explore_epsilon
         
-        joint_action_prob = np.zeros(self.joint_action_size)
-        joint_action_prob[index:index+self.action_size] = prob_output
+        # joint_action_prob = np.zeros(self.joint_action_size)
+        # joint_action_prob[index:index+self.action_size] = prob_output
 
-        return joint_action_prob
+        return prob_output
+
+        if self.n_agents > 1:
+            q_values = self(s)
+
+            if not torch.cuda.is_available():
+                qval_np = q_values.data.numpy()
+            else:
+                qval_np = q_values.data.cpu().numpy()
+
+            return 1
+        else:
+            q_values = self(s)
+            # joint_state_dim = self.state_dim
+            
+            if not torch.cuda.is_available():
+                qval_np = q_values.data.numpy()
+            else:
+                qval_np = q_values.data.cpu().numpy()
+            
+            # index = n_agent*self.action_size
+            # q_slice = qval_np[index:index+self.action_size] # slice of the Q(s, a) output belonging to the n_agent
+            
+            action_ind = np.argmax(qval_np)
+            prob_output = np.ones(len(qval_np)) * (explore_epsilon / (self.state_dim - 1) )
+            prob_output[action_ind] = 1 - explore_epsilon
+            
+            # joint_action_prob = np.zeros(self.joint_action_size)
+            # joint_action_prob[index:index+self.action_size] = prob_output
+
+            return prob_output
     
     def prob_state_trans(self, s, a, s_next):
         # 1 / |s| (to start)... update to: prob_state_trans() + (1 - prob_state_trans() )/(Num. visit_counter[s][a])
