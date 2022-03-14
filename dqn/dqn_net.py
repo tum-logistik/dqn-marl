@@ -48,16 +48,16 @@ class DQNNet():
         return self.model(state).to(device = devid)
 
     def extract_mini_batch(self, minibatch, state_dim):
-        state1_batch = torch.cat([s1 for (s1,a,r,s2,d) in minibatch]).view(self.batch_size, state_dim).to(device = devid)
-        action_batch = torch.tensor([a for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
-        reward_batch = torch.tensor([r for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
-        state2_batch = torch.cat([s2 for (s1,a,r,s2,d) in minibatch]).view(self.batch_size, state_dim).to(device = devid)
-        done_batch = torch.tensor([d for (s1,a,r,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
-        return state1_batch, action_batch, reward_batch, state2_batch, done_batch
+        state1_batch = torch.cat([s1 for (s1,a,r,e,s2,d) in minibatch]).view(self.batch_size, state_dim).to(device = devid)
+        action_batch = torch.tensor([a for (s1,a,r,e,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+        reward_batch = torch.tensor([r for (s1,a,r,e,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+        epsilon_nash_batch = torch.tensor([e for (s1,a,r,e,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid) if self.n_agents > 1 else None
+        state2_batch = torch.cat([s2 for (s1,a,r,e,s2,d) in minibatch]).view(self.batch_size, state_dim).to(device = devid)
+        done_batch = torch.tensor([d for (s1,a,r,e,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
+        return state1_batch, action_batch, reward_batch, epsilon_nash_batch, state2_batch, done_batch
     
     def batch_update(self, minibatch, target_net, state_dim, n_agent = 0): # cooperative update MA
-
-        state1_batch, action_batch, reward_batch, state2_batch, done_batch = self.extract_mini_batch(minibatch, state_dim)
+        state1_batch, action_batch, reward_batch, epsilon_nash_batch, state2_batch, done_batch = self.extract_mini_batch(minibatch, state_dim)
         
         # Q update
         Q1 = self(state1_batch).to(device = devid)
@@ -68,11 +68,18 @@ class DQNNet():
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * max_Q2)
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
+
+            zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
+            zeros_tensor.requires_grad=True
+            loss_nash = self.loss_fn(epsilon_nash_batch, zeros_tensor)
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * max_Q2)
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
         
         loss = self.loss_fn(Q_net, Q_formula.detach())
-
-        return Q1, Q2, Q_net, Q_formula, loss
+        
+        if self.n_agents > 1:
+            return Q1, Q2, Q_net, Q_formula, loss, loss_nash
+        else:
+            return Q1, Q2, Q_net, Q_formula, loss

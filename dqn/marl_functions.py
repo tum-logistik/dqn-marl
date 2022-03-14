@@ -39,6 +39,7 @@ def run_marl(MARLAgent,
     avg_epoch_rewards_agent = []
 
     losses = []
+    losses_nash = []
     j = 0
 
     # s -> n -> a
@@ -86,7 +87,7 @@ def run_marl(MARLAgent,
                 
             dic_key = repr(list(state1_np))
             sna_policy_dict[dic_key] = na_policy_dict
-            
+
             state2_, joint_rewards, done, info_dic = marketEnv.joint_step(agent_action_indices)
             state2 = torch.from_numpy(state2_).float().to(device = devid)
 
@@ -95,9 +96,10 @@ def run_marl(MARLAgent,
             joint_action_index = np.zeros(np.power(marketEnv.action_size, marketEnv.n_agents)).reshape(-1)
             joint_action_index[nn_index] = 1
 
-            epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict)
+            epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, k_max = 9)
+            epsilon_nash = np.sum(epsilon_nash_arr)
 
-            exp = (state1, nn_index, joint_rewards, state2, done)
+            exp = (state1, nn_index, joint_rewards, epsilon_nash, state2, done)
             
             replay.append(exp)
             state1 = state2
@@ -110,16 +112,24 @@ def run_marl(MARLAgent,
             
             if len(replay) > batch_size:
                 minibatch = random.sample(replay, batch_size)
-                Q1, Q2, X, Y, loss = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
+                Q1, Q2, X, Y, loss, loss_nash = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
 
                 print(i, loss.item())
+                print(i, loss_nash.item())
                 clear_output(wait=True)
                 
+                # Q learning
                 MARLAgent.optimizer.zero_grad()
                 loss.backward()
                 losses.append(loss.item())
                 MARLAgent.optimizer.step()
-                
+
+                # Nash learning
+                MARLAgent.optimizer.zero_grad()
+                loss_nash.backward()
+                losses_nash.append(loss_nash.item())
+                MARLAgent.optimizer.step()
+
                 if j % sync_freq == 0:
                     target_net.load_state_dict(MARLAgent.model.state_dict())
 
