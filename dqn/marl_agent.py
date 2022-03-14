@@ -42,26 +42,38 @@ class MARLAgent(DQNNet):
             batch_size = BATCH_SIZE,
             loss_fn = DEFAULT_LOSS_FUNC,
             learning_rate = LEARNING_RATE,
-            n_agents = env.n_agents)
+            n_agents = env.n_agents,
+            action_space_size = len(env.action_space))
 
     # n_agent starts from 0
-    def prob_action(self, s, explore_epsilon = EXPLORE_EPSILON):
+    def prob_action(self, s, n_agent = 0, explore_epsilon = EXPLORE_EPSILON):
         # Epsilon greedy maximum of Q net
         q_values = self(s)
+        nash_pol = self.nash_policy_model(s)
 
         if not torch.cuda.is_available():
             qval_np = q_values.data.numpy()
+            nash_pol_np = nash_pol.data.numpy()
         else:
             qval_np = q_values.data.cpu().numpy()
+            nash_pol_np = nash_pol.data.cpu().numpy()
         
-        action_ind = np.argmax(qval_np)
+        index = n_agent * self.action_size
+        policy_slice = nash_pol_np[index:index+self.action_size] # slice of the policy(s, a) output belonging to the n_agent
+        norm_police_slice = [x/sum(policy_slice) for x in policy_slice]
+
+        action_ind = np.random.choice(np.arange(0, self.action_size), p=norm_police_slice)
+
+
+        # action_ind = np.argmax(qval_np)
+
         prob_output = np.ones(len(qval_np)) * (explore_epsilon / (self.state_dim - 1) )
         prob_output[action_ind] = 1 - explore_epsilon
         
         # joint_action_prob = np.zeros(self.joint_action_size)
         # joint_action_prob[index:index+self.action_size] = prob_output
 
-        return prob_output
+        return norm_police_slice
 
         if self.n_agents > 1:
             q_values = self(s)

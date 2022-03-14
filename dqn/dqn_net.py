@@ -16,7 +16,8 @@ class DQNNet():
                 batch_size = BATCH_SIZE,
                 loss_fn = DEFAULT_LOSS_FUNC,
                 learning_rate = LEARNING_RATE,
-                n_agents = 1):
+                n_agents = 1,
+                action_space_size = None):
         
         self.model = torch.nn.Sequential(
             torch.nn.Linear(state_dim, hidden_size),
@@ -32,6 +33,16 @@ class DQNNet():
         self.batch_size = batch_size
         self.loss_fn = loss_fn
         self.n_agents = n_agents
+        self.action_space_size = action_space_size
+
+        if self.n_agents > 1:
+            self.nash_policy_model = torch.nn.Sequential(
+                torch.nn.Linear(state_dim, hidden_size),
+                torch.nn.ReLU(),
+                torch.nn.Linear(hidden_size, hidden_size),
+                torch.nn.ReLU(),
+                torch.nn.Linear(hidden_size, self.n_agents * self.action_space_size ),
+                torch.nn.Sigmoid()).to(device = devid)
     
     def __call__(self, state):
         return self.model(state).to(device = devid)

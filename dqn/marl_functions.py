@@ -56,10 +56,7 @@ def run_marl(MARLAgent,
             for n in range(MARLAgent.n_agents):
                 play_prob = MARLAgent.prob_action(state1) # passes through the q net (currently global)
 
-                if (random.random() < explore_epsilon):
-                    action_ind = np.random.randint(0, int(MARLAgent.output_size / MARLAgent.n_agents))
-                else:
-                    action_ind = np.argmax(play_prob) # Use Approx Nash Eq. finder
+                action_ind = np.random.choice(np.arange(0, marketEnv.action_size ), p=play_prob)
                 
                 # Execute action and upate state, and get reward + boolTerminal
                 agent_action_indices[n] = action_ind
