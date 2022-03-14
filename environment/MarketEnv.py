@@ -17,7 +17,7 @@ class MarketEnv():
         self.state_env_dim = n_agents + 1
         
         self.inventory = self.max_inventory
-        self.inventory_space_single = np.arange(0, max_inventory)
+        self.inventory_space_single = np.arange(0, max_inventory+1)
 
         self.action_space = np.arange(0, action_size) * (max_price / action_size)
         
@@ -30,7 +30,6 @@ class MarketEnv():
 
         self.max_demand = max_demand
         self.demand_slope = demand_slope
-        # self.state_space_size = self.max_inventory * action_size
 
         # State space
         comb_arg = [self.inventory_space_single] * self.n_agents + [self.action_space] # includes reference price

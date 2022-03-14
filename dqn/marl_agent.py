@@ -61,50 +61,10 @@ class MARLAgent(DQNNet):
         index = n_agent * self.action_size
         policy_slice = nash_pol_np[index:index+self.action_size] # slice of the policy(s, a) output belonging to the n_agent
         norm_police_slice = [x/sum(policy_slice) for x in policy_slice]
-
-        action_ind = np.random.choice(np.arange(0, self.action_size), p=norm_police_slice)
-
-
-        # action_ind = np.argmax(qval_np)
-
-        prob_output = np.ones(len(qval_np)) * (explore_epsilon / (self.state_dim - 1) )
-        prob_output[action_ind] = 1 - explore_epsilon
         
-        # joint_action_prob = np.zeros(self.joint_action_size)
-        # joint_action_prob[index:index+self.action_size] = prob_output
-
         return norm_police_slice
 
-        if self.n_agents > 1:
-            q_values = self(s)
-
-            if not torch.cuda.is_available():
-                qval_np = q_values.data.numpy()
-            else:
-                qval_np = q_values.data.cpu().numpy()
-
-            return 1
-        else:
-            q_values = self(s)
-            # joint_state_dim = self.state_dim
-            
-            if not torch.cuda.is_available():
-                qval_np = q_values.data.numpy()
-            else:
-                qval_np = q_values.data.cpu().numpy()
-            
-            # index = n_agent*self.action_size
-            # q_slice = qval_np[index:index+self.action_size] # slice of the Q(s, a) output belonging to the n_agent
-            
-            action_ind = np.argmax(qval_np)
-            prob_output = np.ones(len(qval_np)) * (explore_epsilon / (self.state_dim - 1) )
-            prob_output[action_ind] = 1 - explore_epsilon
-            
-            # joint_action_prob = np.zeros(self.joint_action_size)
-            # joint_action_prob[index:index+self.action_size] = prob_output
-
-            return prob_output
-    
+        
     def prob_state_trans(self, s, a, s_next):
         # 1 / |s| (to start)... update to: prob_state_trans() + (1 - prob_state_trans() )/(Num. visit_counter[s][a])
         return self.s_trans_prob[repr([s, a, s_next])]

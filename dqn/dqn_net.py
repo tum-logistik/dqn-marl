@@ -65,50 +65,12 @@ class DQNNet():
             Q2 = target_net(state2_batch).to(device = devid)
         
         if self.n_agents > 1:
-            # action_space_size = int(self.output_size / self.n_agents)
-            # Q2_reshape = torch.reshape(Q2, (self.batch_size, self.n_agents, action_space_size))
-            # max_Q2 = torch.max(Q2_reshape, dim = 2)[0]
-            # Q_formula = reward_batch + self.gamma * (1-done_batch) * max_Q2
-            
-            # # Q1_joint = Q1.gather(dim=1, index=action_batch.type(torch.int64)).squeeze()
-            # Q1_reshape = torch.reshape(Q1, (self.batch_size, self.n_agents, action_space_size))
-            # Q_net = torch.max(Q1_reshape, dim = 2)[0]
             max_Q2 = torch.max(Q2,dim=1)[0]
-            reward_batch_n = reward_batch[:, n_agent]
             Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * max_Q2)
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
-
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * max_Q2)
-            Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
-        
-        loss = self.loss_fn(Q_net, Q_formula.detach())
-
-        return Q1, Q2, Q_net, Q_formula, loss
-
-    def batch_update_competitive(self, minibatch, target_net, state_dim, agent_index = 0):
-
-        state1_batch, action_batch, reward_batch, state2_batch, done_batch = self.extract_mini_batch(minibatch, state_dim)
-
-        # Q update
-        Q1 = self(state1_batch).to(device = devid)
-        with torch.no_grad():
-            Q2 = target_net(state2_batch).to(device = devid)
-        
-        if self.n_agents > 1:
-            action_space_size = int(self.output_size / self.n_agents)
-            Q2_reshape = torch.reshape(Q2, (self.batch_size, self.n_agents, action_space_size))
-            Q2_reshape_N_agent = Q2_reshape[:, agent_index, :]
-            max_Q2 = torch.max(Q2_reshape_N_agent, dim = 1)[0]
-            Q_formula = reward_batch[:, agent_index] + self.gamma * (1-done_batch[:, agent_index]) * max_Q2 # Update change with NashQ
-            
-            # Q1_joint = Q1.gather(dim=1, index=action_batch.type(torch.int64)).squeeze()
-            Q1_reshape = torch.reshape(Q1, (self.batch_size, self.n_agents, action_space_size))
-            Q1_reshape_N_agent = Q1_reshape[:, agent_index, :]
-            Q_net = torch.max(Q1_reshape_N_agent, dim = 1)[0]
-        else:
-            Q_formula = reward_batch + self.gamma * ((1-done_batch) * torch.max(Q2,dim=1)[0]) # Update change with NashQ
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
         
         loss = self.loss_fn(Q_net, Q_formula.detach())

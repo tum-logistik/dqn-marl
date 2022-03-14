@@ -3,9 +3,9 @@ import numpy as np
 from dqn.marl_functions import *
 from dqn.marl_agent import *
 
-env = MarketEnv(action_size = 4, 
+env = MarketEnv(action_size = 10, 
                     n_agents = 3, 
-                    max_inventory = 1, 
+                    max_inventory = 0, 
                     max_demand = 3, 
                     demand_slope = 0.75)
 

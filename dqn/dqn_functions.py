@@ -36,7 +36,6 @@ def run_dqn(DQNModel,
         mov = 0
         rewards = []
         
-
         while(status == 1): 
             j+=1
             mov += 1
@@ -64,7 +63,7 @@ def run_dqn(DQNModel,
             state1 = state2
             
             rewards.append(reward)
-
+            
             # print out
             print(action)
             print(reward)

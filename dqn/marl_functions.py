@@ -7,6 +7,8 @@ from tests.test_gw import *
 from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn.dqn_net import DQNNet
+from common.hash_functions import *
+from opt.bbo_sim_anneal import *
 
 def build_one_hot(n, size):
     arr = np.zeros(size)
@@ -39,6 +41,17 @@ def run_marl(MARLAgent,
     losses = []
     j = 0
 
+    # s -> n -> a
+    na_policy_dict = dict()
+    for n in range(marketEnv.n_agents):
+        na_policy_dict[n] = neutral_policy_dic
+
+    # everyone same policy
+    sna_policy_dict = dict()
+    for s in range(marketEnv.state_space_size):
+        key = repr(list(marketEnv.state_space[s]))
+        sna_policy_dict[key] = na_policy_dict
+
     for i in range(epochs):
         state1_ = marketEnv.reset()
         state1 = torch.from_numpy(state1_).float().to(device = devid)
@@ -51,24 +64,40 @@ def run_marl(MARLAgent,
             j += 1
             mov += 1
             
-            
+            if not torch.cuda.is_available():
+                state1_np = state1.data.numpy()
+            else:
+                state1_np = state1.data.cpu().numpy()
+            state1_np[-1] = int(np.clip(state1_np[-1], 0, marketEnv.action_size))
+
             # pick agent to play, loop over all agents
             agent_action_indices = np.zeros(MARLAgent.n_agents)
+            agent_policies = np.zeros([MARLAgent.n_agents, MARLAgent.action_size])
+            na_policy_dict = dict()
             for n in range(MARLAgent.n_agents):
                 play_prob = MARLAgent.prob_action(state1) # passes through the q net (currently global)
-
                 action_ind = np.random.choice(np.arange(0, marketEnv.action_size ), p=play_prob)
-
+                
                 # Execute action and upate state, and get reward + boolTerminal
                 agent_action_indices[n] = action_ind
+                agent_policies[n] = np.array(play_prob)
+                na_policy_dict[n] = RangeMapDict(dict(zip(list(range_dict.keys()), agent_policies[n])))
+                
+                
+            dic_key = repr(list(state1_np))
+            sna_policy_dict[dic_key] = na_policy_dict
             
             state2_, joint_rewards, done, info_dic = marketEnv.joint_step(agent_action_indices)
             state2 = torch.from_numpy(state2_).float().to(device = devid)
 
             # create action long form
-            action_indice_longform = np.array([build_one_hot(x, MARLAgent.action_size) for x in agent_action_indices]).reshape(-1)
+            nn_index = int(action_index_to_hash(agent_action_indices, step = marketEnv.action_size))
+            joint_action_index = np.zeros(np.power(marketEnv.action_size, marketEnv.n_agents)).reshape(-1)
+            joint_action_index[nn_index] = 1
 
-            exp = (state1, action_indice_longform, joint_rewards, state2, done)
+            epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict)
+
+            exp = (state1, nn_index, joint_rewards, state2, done)
             
             replay.append(exp)
             state1 = state2
