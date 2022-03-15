@@ -26,11 +26,11 @@ def run_marl(MARLAgent,
             explore_epsilon = EXPLORE_EPSILON,
             agent_index = 0):
 
-    marl_agent_list = []
-    for a in range(marketEnv.n_agents):
-        target_net = copy.deepcopy(MARLAgent.model)
-        target_net.load_state_dict(MARLAgent.model.state_dict())
-        marl_agent_list.append(target_net)
+    # marl_agent_list = []
+    # for a in range(marketEnv.n_agents):
+    #     target_net = copy.deepcopy(MARLAgent.model)
+    #     target_net.load_state_dict(MARLAgent.model.state_dict())
+    #     marl_agent_list.append(target_net)
     
     episode_rewards = []
     episode_rewards_sum = []

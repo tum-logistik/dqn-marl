@@ -4,7 +4,6 @@ from IPython.display import clear_output
 import random
 from collections import deque
 from tests.test_gw import *
-from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn.dqn_net import DQNNet
 
