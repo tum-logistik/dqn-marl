@@ -32,6 +32,9 @@ def run_marl(MARLAgent,
     #     target_net.load_state_dict(MARLAgent.model.state_dict())
     #     marl_agent_list.append(target_net)
     
+    target_net = copy.deepcopy(MARLAgent.model)
+    target_net.load_state_dict(MARLAgent.model.state_dict())
+    
     episode_rewards = []
     episode_rewards_sum = []
     episode_rewards_agent = []
