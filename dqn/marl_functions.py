@@ -15,10 +15,7 @@ def build_one_hot(n, size):
     arr[int(n)] = 1
     return arr
 
-def q_nash_callback(s, joint_action):
-    # MARLAgent(s)
 
-    return 1
 
 def run_marl(MARLAgent, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
@@ -88,8 +85,6 @@ def run_marl(MARLAgent,
                 agent_action_indices[n] = action_ind
                 agent_policies[n] = np.array(play_prob)
                 na_policy_dict[n] = RangeMapDict(dict(zip(list(range_dict.keys()), agent_policies[n])))
-                
-            q_vals = MARLAgent(state1)
 
             dic_key = repr(list(state1_np))
             sna_policy_dict[dic_key] = na_policy_dict
@@ -102,7 +97,7 @@ def run_marl(MARLAgent,
             joint_action_index = np.zeros(np.power(marketEnv.action_size, marketEnv.n_agents)).reshape(-1)
             joint_action_index[nn_index] = 1
 
-            epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, k_max = 9)
+            epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, k_max = 9, q_network_input = MARLAgent)
             epsilon_nash = np.sum(epsilon_nash_arr)
 
             exp = (state1, nn_index, joint_rewards, epsilon_nash, state2, done)

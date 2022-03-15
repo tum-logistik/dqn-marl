@@ -2,6 +2,8 @@ import numpy as np
 import copy
 from opt.value_estimator import *
 
+
+
 def temp_func(k, k_max, const = 3.0):
     return const * np.exp(1 - ((k+1)/k_max))
 
@@ -61,7 +63,7 @@ def perturb_policy(policy_dic, st_dev = 0.03):
     
     return policy_dic
 
-def sim_anneal_optimize(env, sna_policy_dict, k_max = 99, q_func = convex_q_gen):
+def sim_anneal_optimize(env, sna_policy_dict, k_max = 99, q_func = None, q_network_input = None):
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
     value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter)
     value_cur_policy = value_initial_policy
@@ -72,8 +74,8 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = 99, q_func = convex_q_gen)
             state_key = repr(list(state))
             for n in range(env.n_agents):
                 sna_policy_dict_candidate[state_key][n] = perturb_policy(sna_policy_dict_iter[state_key][n])
-
-        value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate, q_func_callback = q_func)
+    
+        value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate, q_network = q_network_input)
 
         if accept_prob(value_cur_policy, value_candidate_policy, T) > np.random.uniform(0, 1):
             sna_policy_dict_iter = sna_policy_dict_candidate
