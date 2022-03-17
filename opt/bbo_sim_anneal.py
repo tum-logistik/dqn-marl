@@ -67,6 +67,7 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = 99, q_func = None, q_netwo
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
     value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter)
     value_cur_policy = value_initial_policy
+    epsilon = np.ones(env.state_space_size)*np.Inf
     for k in range(k_max):
         T = temp_func(k, k_max)
         sna_policy_dict_candidate = copy.deepcopy(sna_policy_dict_iter)
@@ -79,7 +80,8 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = 99, q_func = None, q_netwo
 
         if accept_prob(value_cur_policy, value_candidate_policy, T) > np.random.uniform(0, 1):
             sna_policy_dict_iter = sna_policy_dict_candidate
+            epsilon = value_candidate_policy - value_cur_policy
         # potentially add early termination
-    epsilon = value_candidate_policy - value_cur_policy
+    
 
     return epsilon, value_cur_policy, sna_policy_dict_iter
