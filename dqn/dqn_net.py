@@ -70,7 +70,7 @@ class DQNNet():
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
 
             zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
-            zeros_tensor.requires_grad=True
+            epsilon_nash_batch.requires_grad=True
             loss_nash = self.loss_fn(epsilon_nash_batch, zeros_tensor)
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
