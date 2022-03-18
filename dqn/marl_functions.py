@@ -134,7 +134,7 @@ def run_marl(MARLAgent,
                 MARLAgent.nash_optimizer.zero_grad()
                 loss_nash.backward()
                 losses_nash.append(loss_nash.item())
-                MARLAgent.optimizer.step()
+                MARLAgent.nash_optimizer.step()
 
                 if j % sync_freq == 0:
                     target_net.load_state_dict(MARLAgent.model.state_dict())
