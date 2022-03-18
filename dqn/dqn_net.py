@@ -39,9 +39,9 @@ class DQNNet():
             self.nash_policy_model = torch.nn.Sequential(
                 torch.nn.Linear(state_dim, hidden_size),
                 torch.nn.ReLU(),
-                torch.nn.Linear(hidden_size, hidden_size*5),
+                torch.nn.Linear(hidden_size, hidden_size*20),
                 torch.nn.ReLU(),
-                torch.nn.Linear(hidden_size*5, hidden_size),
+                torch.nn.Linear(hidden_size*20, hidden_size),
                 torch.nn.ReLU(),
                 torch.nn.Linear(hidden_size, self.n_agents * self.action_space_size ),
                 torch.nn.Sigmoid()).to(device = devid)
