@@ -80,8 +80,9 @@ class MarketEnv():
         
         # previous_ref_price = self.current_state[-1]
         action_values = action_indices # special case
-        selected_joint_act_index = int(np.max(action_values)) # refernce price: **minimum or average or any other function**, current or previous time
-        set_price = self.action_space[selected_joint_act_index]
+        # selected_joint_act_index = int(np.max(action_values)) # refernce price: **minimum or average or any other function**, current or previous time
+        # set_price = self.action_space[selected_joint_act_index]
+        set_price = self.current_state[-1]
         demand_lambda = self.max_demand - self.demand_slope*set_price
 
         clipped_lambda = np.max([demand_lambda, 0])
@@ -115,6 +116,8 @@ class MarketEnv():
             inventory_limit = 0
         
         rewards = np.multiply(actionable_actions, action_values+1)
+        new_ref_price = np.mean(action_values+1)
+        self.current_state[-1] = new_ref_price
         next_state = self.current_state
         
         return next_state, rewards, [inventory_limit] * self.n_agents, dict()
