@@ -12,7 +12,7 @@ else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-BATCH_SIZE = 24
+BATCH_SIZE = 58
 
 # DQN Iterative Parameters
 EPOCHS = 4000
@@ -47,3 +47,8 @@ range_dict = {
 
 neutral_policy_dic = RangeMapDict(range_dict)
 
+# SA PARAMETERS
+K_MAX_SA = 21
+
+# MC PARAMETERS
+MC_MAX_ITER = 99

@@ -103,9 +103,9 @@ def run_marl(MARLAgent,
             epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
             state1_index = list(sna_policy_dict.keys()).index(repr(list(state1_np)))
             # epsilon_nash = np.sum(epsilon_nash_arr) # optimize for sum or epsilons
-            epsilon_nash = epsilon_nash_arr[state1_index] # optimize for state's epsilon value
+            # epsilon_nash = epsilon_nash_arr[state1_index] # optimize for state's epsilon value
             
-            exp = (state1, nn_index, joint_rewards, epsilon_nash, state2, done)
+            exp = (state1, nn_index, joint_rewards, epsilon_nash_arr, state2, done)
             
             replay.append(exp)
             state1 = state2

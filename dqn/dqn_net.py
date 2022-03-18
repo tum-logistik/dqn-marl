@@ -43,7 +43,7 @@ class DQNNet():
                 torch.nn.ReLU(),
                 torch.nn.Linear(hidden_size*20, hidden_size),
                 torch.nn.ReLU(),
-                torch.nn.Linear(hidden_size, self.n_agents * self.action_space_size ),
+                torch.nn.Linear(hidden_size, self.action_space_size ),
                 torch.nn.Sigmoid()).to(device = devid)
             self.nash_optimizer = torch.optim.Adam(self.nash_policy_model.parameters(), lr=learning_rate)
     
@@ -72,9 +72,11 @@ class DQNNet():
             Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * max_Q2)
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
 
-            zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
+            nash_policy_pred = self.nash_policy_model(state1_batch)
+
+            # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
             epsilon_nash_batch.requires_grad=True
-            loss_nash = self.loss_fn(epsilon_nash_batch, zeros_tensor)
+            loss_nash = self.loss_fn(epsilon_nash_batch, nash_policy_pred)
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * max_Q2)
