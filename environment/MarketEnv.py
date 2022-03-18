@@ -91,25 +91,30 @@ class MarketEnv():
         auction_counts = self.auction_system(action_values, demand)
 
         # reward = set_price * demand
-        actionable_actions = auction_counts # available inventory
-        inventories = self.current_state[0:self.n_agents] - auction_counts
-        for i in range(len(inventories)):
-            if inventories[i] < 0:
-                actionable_actions[i] = self.current_state[0:self.n_agents][i] # sold out, take previous inventory
-                inventories[i] = 0
+        if self.max_inventory > 0:
+            actionable_actions = auction_counts # available inventory
+            inventories = self.current_state[0:self.n_agents] - auction_counts
+            for i in range(len(inventories)):
+                if inventories[i] < 0:
+                    actionable_actions[i] = self.current_state[0:self.n_agents][i] # sold out, take previous inventory
+                    inventories[i] = 0
         
-        rewards = np.multiply(actionable_actions, action_values+1) # limit min sale price to 1
+            # limit min sale price to 1
 
-        # state update, reminder last index = set price
-        self.current_state[self.n_agents] = set_price
-        if inventories.any() > 0:
-            inventory_limit = False
-            self.current_state[0:self.n_agents] = inventories
-            
+            # state update, reminder last index = set price
+            self.current_state[self.n_agents] = set_price
+            if inventories.any() > 0:
+                inventory_limit = False
+                self.current_state[0:self.n_agents] = inventories
+                
+            else:
+                inventory_limit = True
+                self.current_state[0:self.n_agents] = self.max_inventory
         else:
-            inventory_limit = True
-            self.current_state[0:self.n_agents] = self.max_inventory
+            actionable_actions = np.ones(self.n_agents) # available inventory
+            inventory_limit = 0
         
+        rewards = np.multiply(actionable_actions, action_values+1)
         next_state = self.current_state
         
         return next_state, rewards, [inventory_limit] * self.n_agents, dict()
