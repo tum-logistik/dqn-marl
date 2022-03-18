@@ -60,7 +60,7 @@ class DQNNet():
         return state1_batch, action_batch, reward_batch, epsilon_nash_batch, state2_batch, done_batch
     
     def batch_update(self, minibatch, target_net, state_dim, n_agent = 0): # cooperative update MA
-        state1_batch, action_batch, reward_batch, epsilon_nash_batch, state2_batch, done_batch = self.extract_mini_batch(minibatch, state_dim)
+        state1_batch, action_batch, reward_batch, epsilon_policy_batch, state2_batch, done_batch = self.extract_mini_batch(minibatch, state_dim)
         
         # Q update
         Q1 = self(state1_batch).to(device = devid)
@@ -75,8 +75,8 @@ class DQNNet():
             nash_policy_pred = self.nash_policy_model(state1_batch)
 
             # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
-            epsilon_nash_batch.requires_grad=True
-            loss_nash = self.loss_fn(epsilon_nash_batch, nash_policy_pred)
+            epsilon_policy_batch.requires_grad=True
+            loss_nash = self.loss_fn(epsilon_policy_batch, nash_policy_pred)
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * max_Q2)
