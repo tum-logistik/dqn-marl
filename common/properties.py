@@ -25,7 +25,7 @@ replay = deque(maxlen = MEM_SIZE)
 # DQN Parameters
 HIDDEN_SIZE = 200
 GAMMA = 0.8
-DEFAULT_LOSS_FUNC = torch.nn.MSELoss()
+DEFAULT_LOSS_FUNC = torch.nn.HuberLoss()
 LEARNING_RATE = 1e-3
 
 # MDP Parameters
