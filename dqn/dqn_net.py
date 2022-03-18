@@ -73,7 +73,6 @@ class DQNNet():
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
 
             nash_policy_pred = self.nash_policy_model(state1_batch)
-
             # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
             epsilon_policy_batch.requires_grad=True
             loss_nash = self.loss_fn(epsilon_policy_batch, nash_policy_pred)
