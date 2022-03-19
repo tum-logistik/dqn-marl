@@ -58,7 +58,7 @@ class DQNNet():
                 torch.nn.ReLU(),
                 torch.nn.Linear(hidden_size, self.action_space_size * self.n_agents),
                 torch.nn.Sigmoid()).to(device = devid)
-            self.nash_optimizer = torch.optim.Adam(self.nash_policy_model.parameters(), lr=learning_rate)
+            self.nash_optimizer = torch.optim.Adam(self.nash_policy_model.parameters(), lr=learning_rate/1e2)
     
     def __call__(self, state):
         return self.model(state).to(device = devid)
