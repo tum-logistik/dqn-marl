@@ -42,7 +42,8 @@ class MARLAgent(DQNNet):
             loss_fn = DEFAULT_LOSS_FUNC,
             learning_rate = LEARNING_RATE,
             n_agents = env.n_agents,
-            action_space_size = len(env.action_space))
+            action_space_size = len(env.action_space),
+            state_space_size = env.state_space_size)
 
     # n_agent starts from 0
     def prob_action(self, s, n_agent = 0, explore_epsilon = EXPLORE_EPSILON):

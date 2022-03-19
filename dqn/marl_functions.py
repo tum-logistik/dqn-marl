@@ -44,6 +44,7 @@ def run_marl(MARLAgent,
     avg_epoch_rewards_agent = []
 
     losses = []
+    losses_eps = []
     losses_nash = []
     j = 0
 
@@ -107,7 +108,7 @@ def run_marl(MARLAgent,
             na_policy_dict_epsmax = sna_policy_dict_iter[dic_key]
             na_policy_dict_epsmax_array = np.array([list(na_policy_dict_epsmax[k].range_dic.values()) for k in na_policy_dict_epsmax]).flatten()
 
-            exp = (state1, nn_index, joint_rewards, na_policy_dict_epsmax_array, state2, done)
+            exp = (state1, nn_index, joint_rewards, epsilon_nash_arr, na_policy_dict_epsmax_array, state2, done)
             
             replay.append(exp)
             state1 = state2
@@ -120,7 +121,7 @@ def run_marl(MARLAgent,
             
             if len(replay) > batch_size:
                 minibatch = random.sample(replay, batch_size)
-                Q1, Q2, X, Y, loss, loss_nash = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
+                Q1, Q2, X, Y, loss, loss_eps, loss_nash = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
 
                 print(i, loss.item())
                 print(i, loss_nash.item())
@@ -131,6 +132,12 @@ def run_marl(MARLAgent,
                 loss.backward()
                 losses.append(loss.item())
                 MARLAgent.optimizer.step()
+
+                # Eps learning
+                MARLAgent.eps_optimizer.zero_grad()
+                loss_eps.backward()
+                losses_eps.append(loss_eps.item())
+                MARLAgent.eps_optimizer.step()
 
                 # Nash learning
                 MARLAgent.nash_optimizer.zero_grad()
@@ -157,4 +164,4 @@ def run_marl(MARLAgent,
         avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
         avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
     
-    return np.array(episode_rewards), np.array(avg_epoch_rewards), np.array(avg_epoch_rewards_sum), np.array(avg_epoch_rewards_agent), np.array(losses), np.array(losses_nash)
+    return np.array(episode_rewards), np.array(avg_epoch_rewards), np.array(avg_epoch_rewards_sum), np.array(avg_epoch_rewards_agent), np.array(losses), np.array(losses_eps), np.array(losses_nash)
