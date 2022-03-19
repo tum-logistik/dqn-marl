@@ -12,7 +12,7 @@ else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-BATCH_SIZE = 21
+BATCH_SIZE = 100
 
 # DQN Iterative Parameters
 EPOCHS = 27
