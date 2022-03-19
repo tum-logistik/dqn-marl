@@ -68,7 +68,7 @@ class DQNNet():
         action_batch = torch.tensor([a for (s1,a,r,e,ep,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
         reward_batch = torch.tensor([r for (s1,a,r,e,ep,s2,d)  in minibatch]).type(torch.FloatTensor).to(device = devid)
         epsilon_nash_batch = torch.tensor([e for (s1,a,r,e,ep,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid) if self.n_agents > 1 else None
-        epsilon_policy_batch = torch.tensor([e for (s1,a,r,e,ep,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid) if self.n_agents > 1 else None
+        epsilon_policy_batch = torch.tensor([ep for (s1,a,r,e,ep,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid) if self.n_agents > 1 else None
         state2_batch = torch.cat([s2 for (s1,a,r,e,ep,s2,d) in minibatch]).view(self.batch_size, state_dim).to(device = devid)
         done_batch = torch.tensor([d for (s1,a,r,e,ep,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
         return state1_batch, action_batch, reward_batch, epsilon_nash_batch, epsilon_policy_batch, state2_batch, done_batch
@@ -94,7 +94,7 @@ class DQNNet():
 
             # Nash Policy Net
             nash_policy_pred = self.nash_policy_model(state1_batch)
-            zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
+            # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
             epsilon_policy_batch.requires_grad=True
             loss_nash = self.loss_fn(epsilon_policy_batch, nash_policy_pred)
         else:
