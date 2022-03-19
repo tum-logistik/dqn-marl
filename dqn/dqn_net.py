@@ -28,7 +28,7 @@ class DQNNet():
             torch.nn.Linear(hidden_size, output_size)).to(device = devid)
         
         self.output_size = output_size
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate/1e1)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
         self.state_dim = state_dim
         self.gamma = gamma
         self.batch_size = batch_size
