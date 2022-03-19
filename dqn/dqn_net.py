@@ -96,7 +96,7 @@ class DQNNet():
             nash_policy_pred = self.nash_policy_model(state1_batch)
             zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
             epsilon_policy_batch.requires_grad=True
-            loss_nash = self.loss_fn(eps_pred, zeros_tensor)
+            loss_nash = self.loss_fn(epsilon_policy_batch, nash_policy_pred)
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * max_Q2)
