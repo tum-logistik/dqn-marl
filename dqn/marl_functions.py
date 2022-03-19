@@ -59,8 +59,9 @@ def run_marl(MARLAgent,
         key = repr(list(marketEnv.state_space[s]))
         sna_policy_dict[key] = na_policy_dict
 
+    state1_ = marketEnv.reset()
     for i in range(epochs):
-        state1_ = marketEnv.reset()
+        
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         
         status = 1
