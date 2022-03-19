@@ -4,7 +4,6 @@ from IPython.display import clear_output
 import random
 from collections import deque
 from tests.test_gw import *
-from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn.dqn_net import DQNNet
 
@@ -35,38 +34,36 @@ class MARLAgent(DQNNet):
                 for s2 in env.state_space:    
                     self.s_trans_prob[repr([s, a, s2])] = 1 / env.state_space_size
         
-        super(MARLAgent, self).__init__(env.state_env_dim, self.joint_action_size, 
+        super(MARLAgent, self).__init__(env.state_env_dim, 
+            np.power(self.action_size, self.n_agents), 
             hidden_size = HIDDEN_SIZE, 
             gamma = GAMMA, 
             batch_size = BATCH_SIZE,
             loss_fn = DEFAULT_LOSS_FUNC,
             learning_rate = LEARNING_RATE,
-            n_agents = env.n_agents)
+            n_agents = env.n_agents,
+            action_space_size = len(env.action_space))
 
     # n_agent starts from 0
-    def prob_action(self, s, n_agent, 
-            explore_epsilon = EXPLORE_EPSILON):
+    def prob_action(self, s, n_agent = 0, explore_epsilon = EXPLORE_EPSILON):
         # Epsilon greedy maximum of Q net
         q_values = self(s)
-        joint_state_dim = self.state_dim
-        
+        nash_pol = self.nash_policy_model(s)
+
         if not torch.cuda.is_available():
             qval_np = q_values.data.numpy()
+            nash_pol_np = nash_pol.data.numpy()
         else:
             qval_np = q_values.data.cpu().numpy()
+            nash_pol_np = nash_pol.data.cpu().numpy()
         
-        index = n_agent*self.action_size
-        q_slice = qval_np[index:index+self.action_size] # slice of the Q(s, a) output belonging to the n_agent
+        index = n_agent * self.action_size
+        policy_slice = nash_pol_np[index:index+self.action_size] # slice of the policy(s, a) output belonging to the n_agent
+        norm_police_slice = [x/sum(policy_slice) for x in policy_slice]
         
-        action_ind = np.argmax(q_slice)
-        prob_output = np.ones(len(q_slice)) * (explore_epsilon / (self.state_dim - 1) )
-        prob_output[action_ind] = 1 - explore_epsilon
-        
-        joint_action_prob = np.zeros(self.joint_action_size)
-        joint_action_prob[index:index+self.action_size] = prob_output
+        return norm_police_slice
 
-        return joint_action_prob
-    
+        
     def prob_state_trans(self, s, a, s_next):
         # 1 / |s| (to start)... update to: prob_state_trans() + (1 - prob_state_trans() )/(Num. visit_counter[s][a])
         return self.s_trans_prob[repr([s, a, s_next])]

@@ -5,7 +5,7 @@ import itertools
 
 class MarketEnv():
 
-    def __init__(self, action_size, max_price = None, max_demand = 50, demand_slope = 0.5, n_agents = 1, max_inventory = 2500, max_belief = 1):
+    def __init__(self, action_size, max_price = None, max_demand = 50, demand_slope = 5, n_agents = 1, max_inventory = 2500, max_belief = 1):
         # MARL parameters
         if max_price is None:
             max_price = action_size # increment of 1
@@ -17,7 +17,7 @@ class MarketEnv():
         self.state_env_dim = n_agents + 1
         
         self.inventory = self.max_inventory
-        self.inventory_space_single = np.arange(0, max_inventory)
+        self.inventory_space_single = np.arange(0, max_inventory+1)
 
         self.action_space = np.arange(0, action_size) * (max_price / action_size)
         
@@ -30,12 +30,10 @@ class MarketEnv():
 
         self.max_demand = max_demand
         self.demand_slope = demand_slope
-        # self.state_space_size = self.max_inventory * action_size
 
         # State space
         comb_arg = [self.inventory_space_single] * self.n_agents + [self.action_space] # includes reference price
         self.state_space = np.array(np.meshgrid(*comb_arg)).T.reshape(-1, self.n_agents + 1)  #.T.reshape(-1, self.n_agents)
-        
         
         self.state_space_size = len(self.state_space)
 
@@ -82,8 +80,9 @@ class MarketEnv():
         
         # previous_ref_price = self.current_state[-1]
         action_values = action_indices # special case
-        selected_joint_act_index = int(np.max(action_values)) # refernce price: **minimum or average or any other function**, current or previous time
-        set_price = self.action_space[selected_joint_act_index]
+        # selected_joint_act_index = int(np.max(action_values)) # refernce price: **minimum or average or any other function**, current or previous time
+        # set_price = self.action_space[selected_joint_act_index]
+        set_price = self.current_state[-1]
         demand_lambda = self.max_demand - self.demand_slope*set_price
 
         clipped_lambda = np.max([demand_lambda, 0])
@@ -93,25 +92,32 @@ class MarketEnv():
         auction_counts = self.auction_system(action_values, demand)
 
         # reward = set_price * demand
-        actionable_actions = auction_counts # available inventory
-        inventories = self.current_state[0:self.n_agents] - auction_counts
-        for i in range(len(inventories)):
-            if inventories[i] < 0:
-                actionable_actions[i] = self.current_state[0:self.n_agents][i] # sold out, take previous inventory
-                inventories[i] = 0
+        if self.max_inventory > 0:
+            actionable_actions = auction_counts # available inventory
+            inventories = self.current_state[0:self.n_agents] - auction_counts
+            for i in range(len(inventories)):
+                if inventories[i] < 0:
+                    actionable_actions[i] = self.current_state[0:self.n_agents][i] # sold out, take previous inventory
+                    inventories[i] = 0
         
-        rewards = np.multiply(actionable_actions, action_values+1) # limit min sale price to 1
+            # limit min sale price to 1
 
-        # state update, reminder last index = set price
-        self.current_state[self.n_agents] = set_price
-        if inventories.any() > 0:
-            inventory_limit = False
-            self.current_state[0:self.n_agents] = inventories
-            
+            # state update, reminder last index = set price
+            self.current_state[self.n_agents] = set_price
+            if inventories.any() > 0:
+                inventory_limit = False
+                self.current_state[0:self.n_agents] = inventories
+                
+            else:
+                inventory_limit = True
+                self.current_state[0:self.n_agents] = self.max_inventory
         else:
-            inventory_limit = True
-            self.current_state[0:self.n_agents] = self.max_inventory
+            actionable_actions = np.ones(self.n_agents) # available inventory
+            inventory_limit = 0
         
+        rewards = np.multiply(actionable_actions, action_values+1)
+        new_ref_price = np.mean(action_values+1)
+        self.current_state[-1] = new_ref_price
         next_state = self.current_state
         
         return next_state, rewards, [inventory_limit] * self.n_agents, dict()

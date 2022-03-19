@@ -7,11 +7,14 @@ from tests.test_gw import *
 from environment.MarketEnv import MarketEnv
 from common.properties import *
 from dqn.dqn_net import DQNNet
+from common.hash_functions import *
+from opt.bbo_sim_anneal import *
 
 def build_one_hot(n, size):
     arr = np.zeros(size)
     arr[int(n)] = 1
     return arr
+
 
 
 def run_marl(MARLAgent, 
@@ -23,9 +26,15 @@ def run_marl(MARLAgent,
             explore_epsilon = EXPLORE_EPSILON,
             agent_index = 0):
 
+    # marl_agent_list = []
+    # for a in range(marketEnv.n_agents):
+    #     target_net = copy.deepcopy(MARLAgent.model)
+    #     target_net.load_state_dict(MARLAgent.model.state_dict())
+    #     marl_agent_list.append(target_net)
+    
     target_net = copy.deepcopy(MARLAgent.model)
     target_net.load_state_dict(MARLAgent.model.state_dict())
-
+    
     episode_rewards = []
     episode_rewards_sum = []
     episode_rewards_agent = []
@@ -35,7 +44,19 @@ def run_marl(MARLAgent,
     avg_epoch_rewards_agent = []
 
     losses = []
+    losses_nash = []
     j = 0
+
+    # s -> n -> a
+    na_policy_dict = dict()
+    for n in range(marketEnv.n_agents):
+        na_policy_dict[n] = neutral_policy_dic
+
+    # everyone same policy
+    sna_policy_dict = dict()
+    for s in range(marketEnv.state_space_size):
+        key = repr(list(marketEnv.state_space[s]))
+        sna_policy_dict[key] = na_policy_dict
 
     for i in range(epochs):
         state1_ = marketEnv.reset()
@@ -49,26 +70,44 @@ def run_marl(MARLAgent,
             j += 1
             mov += 1
             
+            if not torch.cuda.is_available():
+                state1_np = state1.data.numpy()
+            else:
+                state1_np = state1.data.cpu().numpy()
+            state1_np[-1] = int(np.clip(state1_np[-1], 0, marketEnv.action_size))
+
             # pick agent to play, loop over all agents
             agent_action_indices = np.zeros(MARLAgent.n_agents)
+            agent_policies = np.zeros([MARLAgent.n_agents, MARLAgent.action_size])
+            na_policy_dict = dict()
             for n in range(MARLAgent.n_agents):
-                play_prob = MARLAgent.prob_action(state1, 0) # passes through the q net (currently global)
-
-                if (random.random() < explore_epsilon):
-                    action_ind = np.random.randint(0, int(MARLAgent.output_size / MARLAgent.n_agents) )
-                else:
-                    action_ind = np.argmax(play_prob)
+                play_prob = MARLAgent.prob_action(state1) # passes through the q net (currently global)
+                action_ind = np.random.choice(np.arange(0, marketEnv.action_size ), p=play_prob)
                 
                 # Execute action and upate state, and get reward + boolTerminal
                 agent_action_indices[n] = action_ind
+                agent_policies[n] = np.array(play_prob)
+                na_policy_dict[n] = RangeMapDict(dict(zip(list(range_dict.keys()), agent_policies[n])))
+
+            dic_key = repr(list(state1_np))
+            sna_policy_dict[dic_key] = na_policy_dict
             
             state2_, joint_rewards, done, info_dic = marketEnv.joint_step(agent_action_indices)
             state2 = torch.from_numpy(state2_).float().to(device = devid)
 
             # create action long form
-            action_indice_longform = np.array([build_one_hot(x, MARLAgent.action_size) for x in agent_action_indices]).reshape(-1)
+            nn_index = int(action_index_to_hash(agent_action_indices, step = marketEnv.action_size))
+            joint_action_index = np.zeros(np.power(marketEnv.action_size, marketEnv.n_agents)).reshape(-1)
+            joint_action_index[nn_index] = 1
 
-            exp = (state1, action_indice_longform, joint_rewards, state2, done)
+            epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
+            state1_index = list(sna_policy_dict.keys()).index(repr(list(state1_np)))
+            # epsilon_nash = np.sum(epsilon_nash_arr) # optimize for sum or epsilons
+            epsilon_nash = epsilon_nash_arr[state1_index] # optimize for state's epsilon value
+            na_policy_dict_epsmax = sna_policy_dict_iter[dic_key]
+            na_policy_dict_epsmax_array = np.array([list(na_policy_dict_epsmax[k].range_dic.values()) for k in na_policy_dict_epsmax]).flatten()
+
+            exp = (state1, nn_index, joint_rewards, na_policy_dict_epsmax_array, state2, done)
             
             replay.append(exp)
             state1 = state2
@@ -81,16 +120,24 @@ def run_marl(MARLAgent,
             
             if len(replay) > batch_size:
                 minibatch = random.sample(replay, batch_size)
-                Q1, Q2, X, Y, loss = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
+                Q1, Q2, X, Y, loss, loss_nash = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim)
 
                 print(i, loss.item())
+                print(i, loss_nash.item())
                 clear_output(wait=True)
                 
+                # Q learning
                 MARLAgent.optimizer.zero_grad()
                 loss.backward()
                 losses.append(loss.item())
                 MARLAgent.optimizer.step()
-                
+
+                # Nash learning
+                MARLAgent.nash_optimizer.zero_grad()
+                loss_nash.backward()
+                losses_nash.append(loss_nash.item())
+                MARLAgent.nash_optimizer.step()
+
                 if j % sync_freq == 0:
                     target_net.load_state_dict(MARLAgent.model.state_dict())
 
@@ -99,7 +146,6 @@ def run_marl(MARLAgent,
                 avg_episode_reward = np.mean(np.array(rewards))
                 sum_episode_reward = np.sum(np.array(rewards))
                 agent_episode_reward = np.array(rewards)[-1][agent_index] # single agent reward (agent of interest)
-                clear_output(wait=True)
                 episode_rewards.append(avg_episode_reward)
                 episode_rewards_sum.append(sum_episode_reward)
                 episode_rewards_agent.append(agent_episode_reward)
@@ -109,6 +155,6 @@ def run_marl(MARLAgent,
         smoothing_factor = -50
         avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
         avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
-        avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:] ))
+        avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
     
-    return np.array(losses), np.array(episode_rewards), np.array(avg_epoch_rewards), np.array(avg_epoch_rewards_sum), np.array(avg_epoch_rewards_agent)
+    return np.array(episode_rewards), np.array(avg_epoch_rewards), np.array(avg_epoch_rewards_sum), np.array(avg_epoch_rewards_agent), np.array(losses), np.array(losses_nash)

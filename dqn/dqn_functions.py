@@ -36,7 +36,6 @@ def run_dqn(DQNModel,
         mov = 0
         rewards = []
         
-
         while(status == 1): 
             j+=1
             mov += 1
@@ -58,13 +57,13 @@ def run_dqn(DQNModel,
             marketEnv.step(action)
             state2_, reward, done, info_dic = marketEnv.step(action)
             state2 = torch.from_numpy(state2_).float().to(device = devid)
-            exp = (state1, action, reward, state2, done)
+            exp = (state1, action, reward, None, state2, done)
             
             replay.append(exp)
             state1 = state2
             
             rewards.append(reward)
-
+            
             # print out
             print(action)
             print(reward)
@@ -130,7 +129,7 @@ def run_dqn_eval(DQNModel,
             marketEnv.step(action)
             state2_, reward, done, info_dic = marketEnv.step(action)
             state2 = torch.from_numpy(state2_).float().to(device = devid)
-            exp = (state1, action, reward, state2, done)
+            exp = (state1, action, reward, None, state2, done)
             
             replay.append(exp) #H
             state1 = state2

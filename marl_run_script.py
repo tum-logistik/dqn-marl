@@ -3,15 +3,15 @@ import numpy as np
 from dqn.marl_functions import *
 from dqn.marl_agent import *
 
-env = MarketEnv(action_size = 4, 
-                    n_agents = 2, 
-                    max_inventory = 3, 
+env = MarketEnv(action_size = 10, 
+                    n_agents = 3, 
+                    max_inventory = 0, 
                     max_demand = 3, 
                     demand_slope = 0.75)
 
 marl_agent = MARLAgent(env)
 
-losses, episode_rewards, epoch_rewards, global_rewards, agent_rewards = run_marl(marl_agent, 
+episode_rewards, epoch_rewards, global_rewards, agent_rewards, losses, losses_nash  = run_marl(marl_agent, 
                                                                                 marketEnv = env,
                                                                                 batch_size = BATCH_SIZE,
                                                                                 epochs = EPOCHS,
@@ -20,7 +20,7 @@ losses, episode_rewards, epoch_rewards, global_rewards, agent_rewards = run_marl
                                                                                 sync_freq = SYNC_FREQ,
                                                                                 agent_index = 0)
 
-env_id = "market-marl-40"
+env_id = "market-marl-nash"
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, losses)
 np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, epoch_rewards)
 
