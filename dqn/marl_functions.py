@@ -181,7 +181,7 @@ def run_marl(MARLAgent,
     res.avg_epoch_rewards_agent = np.array(avg_epoch_rewards_agent)
     res.losses = np.array(losses)
     res.losses_eps = np.array(losses_eps)
-    res.loss_nash = np.array(loss_nash)
+    res.losses_nash = np.array(losses_nash)
     res.sna_policy_dict_iter = sna_policy_dict_iter
 
     return res
