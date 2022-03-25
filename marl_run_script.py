@@ -7,7 +7,7 @@ env = MarketEnv(action_size = 10,
                     n_agents = 3, 
                     max_inventory = 0, 
                     max_demand = 3, 
-                    demand_slope = 0.75)
+                    demand_slope = 0.3)
 
 marl_agent = MARLAgent(env)
 
