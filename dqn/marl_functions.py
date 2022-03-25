@@ -9,13 +9,21 @@ from common.properties import *
 from dqn.dqn_net import DQNNet
 from common.hash_functions import *
 from opt.bbo_sim_anneal import *
+# from dataclasses import dataclass
+
+class ResultObj:
+    episode_rewards: np.array
+    avg_epoch_rewards: np.array
+    avg_epoch_rewards_sum: np.array
+    avg_epoch_rewards_agent: np.array
+    losses: np.array
+    losses_eps: np.array
+    losses_nash: np.array
 
 def build_one_hot(n, size):
     arr = np.zeros(size)
     arr[int(n)] = 1
     return arr
-
-
 
 def run_marl(MARLAgent, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
@@ -165,4 +173,15 @@ def run_marl(MARLAgent,
         avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
         avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
     
-    return np.array(episode_rewards), np.array(avg_epoch_rewards), np.array(avg_epoch_rewards_sum), np.array(avg_epoch_rewards_agent), np.array(losses), np.array(losses_eps), np.array(losses_nash)
+    res = ResultObj()
+    res.episode_rewards = np.array(episode_rewards)
+    res.avg_epoch_rewards = np.array(avg_epoch_rewards)
+    res.avg_epoch_rewards_sum = np.array(avg_epoch_rewards_sum)
+    res.avg_epoch_rewards_agent = np.array(avg_epoch_rewards_agent)
+    res.losses = np.array(losses)
+    res.losses_eps = np.array(losses_eps)
+    res.loss_nash = np.array(loss_nash)
+    
+    return res
+
+

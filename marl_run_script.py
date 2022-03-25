@@ -11,27 +11,28 @@ env = MarketEnv(action_size = 10,
 
 marl_agent = MARLAgent(env)
 
-episode_rewards, epoch_rewards, global_rewards, agent_rewards, losses, losses_eps, losses_nash  = run_marl(marl_agent, 
-                                                                                marketEnv = env,
-                                                                                batch_size = BATCH_SIZE,
-                                                                                epochs = EPOCHS,
-                                                                                explore_epsilon = EXPLORE_EPSILON,
-                                                                                max_steps = MAX_STEPS,
-                                                                                sync_freq = SYNC_FREQ,
-                                                                                agent_index = 0)
+# episode_rewards, epoch_rewards, global_rewards, agent_rewards, losses, losses_eps, losses_nash
+res = run_marl(marl_agent, 
+                marketEnv = env,
+                batch_size = BATCH_SIZE,
+                epochs = EPOCHS,
+                explore_epsilon = EXPLORE_EPSILON,
+                max_steps = MAX_STEPS,
+                sync_freq = SYNC_FREQ,
+                agent_index = 0)
 
 env_id = "market-marl-nash"
-np.savetxt("./output/%s_dqn_losses.txt"%env_id, losses)
-np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, epoch_rewards)
+np.savetxt("./output/%s_dqn_losses.txt"%env_id, res.losses)
+np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, ews.epoch_rewards)
 
 plt.figure(figsize=(10,7))
-plt.plot(losses)
+plt.plot(res.losses)
 plt.xlabel("Episodes",fontsize=22)
 plt.ylabel("Loss",fontsize=22)
 plt.savefig("./output/%s_dqn_losses.png"%env_id)
 
 plt.figure(figsize=(10,7))
-plt.plot(epoch_rewards)
+plt.plot(res.epoch_rewards)
 plt.xlabel("Epochs",fontsize=22)
 plt.ylabel("Avg Reward",fontsize=22)
 plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
@@ -57,7 +58,7 @@ torch.save(marl_agent, "./output/%s_dqn_model"%env_id)
 # plt.ylabel("Avg Reward",fontsize=22)
 # plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
 
-np.mean(epoch_rewards)
+np.mean(res.epoch_rewards)
 
 print("done")
 
