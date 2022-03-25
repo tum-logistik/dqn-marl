@@ -19,6 +19,7 @@ class ResultObj:
     losses: np.array
     losses_eps: np.array
     losses_nash: np.array
+    sna_policy_dict_iter: dict
 
 def build_one_hot(n, size):
     arr = np.zeros(size)
@@ -181,7 +182,8 @@ def run_marl(MARLAgent,
     res.losses = np.array(losses)
     res.losses_eps = np.array(losses_eps)
     res.loss_nash = np.array(loss_nash)
-    
+    res.sna_policy_dict_iter = sna_policy_dict_iter
+
     return res
 
 
