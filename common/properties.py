@@ -19,7 +19,7 @@ EPOCHS = 27
 EXPLORE_EPSILON = 0.1
 MAX_STEPS = 25
 SYNC_FREQ = 99
-MEM_SIZE = 101
+MEM_SIZE = 101333
 replay = deque(maxlen = MEM_SIZE)
 
 # DQN Parameters
