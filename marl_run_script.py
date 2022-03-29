@@ -2,12 +2,12 @@ from re import S
 import numpy as np
 from dqn.marl_functions import *
 from dqn.marl_agent import *
+from environment.MarketEnv2 import *
 
-env = MarketEnv(action_size = 10, 
+env = MarketEnv2(action_size = 10, 
                     n_agents = 3, 
                     max_inventory = 0, 
-                    max_demand = 3, 
-                    demand_slope = 0.3)
+                    max_demand = 3)
 
 marl_agent = MARLAgent(env)
 
