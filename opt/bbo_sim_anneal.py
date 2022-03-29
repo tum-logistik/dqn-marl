@@ -70,11 +70,14 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q
     epsilon = np.ones(env.state_space_size)*np.Inf
     for k in range(k_max):
         T = temp_func(k, k_max)
-        sna_policy_dict_candidate = copy.deepcopy(sna_policy_dict_iter)
+        # sna_policy_dict_candidate = copy.deepcopy(sna_policy_dict_iter)
+        sna_policy_dict_candidate = dict()
         for state in env.state_space:
             state_key = repr(list(state))
+            sna_policy_dict_candidate[state_key] = dict()
             for n in range(env.n_agents):
-                sna_policy_dict_candidate[state_key][n] = perturb_policy(sna_policy_dict_iter[state_key][n])
+                pol_dic = perturb_policy(sna_policy_dict_iter[state_key][n])
+                sna_policy_dict_candidate[state_key][n] = copy.deepcopy(pol_dic)
     
         value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate, q_network = q_network_input)
 
@@ -83,5 +86,4 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q
             epsilon = value_candidate_policy - value_cur_policy
         # potentially add early termination
     
-
     return epsilon, value_cur_policy, sna_policy_dict_iter
