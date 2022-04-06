@@ -2,12 +2,12 @@ from re import S
 import numpy as np
 from dqn.marl_functions import *
 from dqn.marl_agent import *
+from environment.MarketEnv2 import *
 
-env = MarketEnv(action_size = 10, 
+env = MarketEnv2(action_size = 10, 
                     n_agents = 3, 
                     max_inventory = 0, 
-                    max_demand = 3, 
-                    demand_slope = 0.3)
+                    max_demand = 3)
 
 marl_agent = MARLAgent(env)
 
@@ -23,7 +23,7 @@ res = run_marl(marl_agent,
 
 env_id = "market-marl-nash"
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, res.losses)
-np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, ews.epoch_rewards)
+np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, res.epoch_rewards)
 
 plt.figure(figsize=(10,7))
 plt.plot(res.losses)
