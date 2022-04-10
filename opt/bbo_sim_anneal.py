@@ -78,7 +78,8 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q
             for n in range(env.n_agents):
                 pol_dic = perturb_policy(sna_policy_dict_iter[state_key][n])
                 sna_policy_dict_candidate[state_key][n] = copy.deepcopy(pol_dic)
-    
+
+        flat_sna_policy_dict_candidate = get_flattened_policy_dict(sna_policy_dict_candidate)
         value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate, q_network = q_network_input)
 
         if accept_prob(value_cur_policy, value_candidate_policy, T) > np.random.uniform(0, 1):
@@ -87,3 +88,14 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q
         # potentially add early termination
     
     return epsilon, value_cur_policy, sna_policy_dict_iter
+
+def get_flattened_policy_dict(sna_policy_dict_candidate):
+    perc_list = []
+    for state in sna_policy_dict_candidate.values():
+        for ranges in state.values():
+            range_dic = ranges.range_dic
+            for percs in range_dic.values():
+                perc_list.append(percs)
+    
+    # flat_perc_list = [item for sublist in perc_list for item in sublist]
+    return perc_list

@@ -79,3 +79,27 @@ def value_search_sample_policy(env, sna_policy_dict, q_func_callback = convex_q_
         joint_action_vector[s] = best_joint_action
     
     return value_vector, joint_action_vector
+
+class NashQEstimator:
+    def __init__(self, env, q_network, sna_policy_dict, max_iter = MC_MAX_ITER, dim=10):
+        self.dim = dim
+        self.lb = -5 * np.ones(dim)
+        self.ub = 10 * np.ones(dim)
+        self.max_iter = max_iter
+
+        self.env = env
+        self.q_network = q_network
+        self.sna_policy_dict = sna_policy_dict
+
+    def __call__(self, x):
+        # assert len(x) == self.dim
+        # assert x.ndim == 1
+        # assert np.all(x <= self.ub) and np.all(x >= self.lb)
+        # w = 1 + (x - 1.0) / 4.0
+        # val = np.sin(np.pi * w[0]) ** 2 + \
+        #     np.sum((w[1:self.dim - 1] - 1) ** 2 * (1 + 10 * np.sin(np.pi * w[1:self.dim - 1] + 1) ** 2)) + \
+        #     (w[self.dim - 1] - 1) ** 2 * (1 + np.sin(2 * np.pi * w[self.dim - 1])**2)
+        
+        value_vector, joint_action_vector = value_search_sample_policy_approx(self.env, self.sna_policy_dict, self.q_network)
+
+        return np.sum(value_vector)
