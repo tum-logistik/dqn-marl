@@ -37,4 +37,7 @@ for s in range(marketEnv.state_space_size):
     key = repr(list(marketEnv.state_space[s]))
     sna_policy_dict[key] = na_policy_dict
 
+
+
+
 epsilon, value_cur_policy = sim_anneal_optimize(marketEnv, sna_policy_dict)

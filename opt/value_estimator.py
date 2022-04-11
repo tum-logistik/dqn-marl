@@ -1,3 +1,4 @@
+from turtle import st
 from common.RangeMap import *
 import numpy as np
 from opt.pseudo_q_generator import *
@@ -81,17 +82,39 @@ def value_search_sample_policy(env, sna_policy_dict, q_func_callback = convex_q_
     return value_vector, joint_action_vector
 
 class NashQEstimator:
-    def __init__(self, env, q_network, sna_policy_dict, max_iter = MC_MAX_ITER, dim=10):
+    def __init__(self, env, q_network, sna_policy_dict, max_iter = MC_MAX_ITER, dim = 10, n_agents = 3):
         self.dim = dim
         self.lb = -5 * np.ones(dim)
         self.ub = 10 * np.ones(dim)
         self.max_iter = max_iter
+        self.n_agents = n_agents
 
         self.env = env
         self.q_network = q_network
-        self.sna_policy_dict = sna_policy_dict
+        self.sna_policy_dict = sna_policy_dict # reverse array of percs to sna_policy_dict
+        self.states = list(sna_policy_dict.keys())
+    
+    def get_state_rep_from_index(self, index):
+        state_index = int(index / (self.dim * self.n_agents))
+        agent_perc_index = index % (self.dim * self.n_agents)
+        agent_index = int(agent_perc_index / self.dim)
+        perc_index = agent_perc_index % self.dim
+        state_rep = self.states[state_index]
+        return state_rep, agent_index, perc_index
+    
+    def get_flattened_policy_dict(self, sna_policy_dict_candidate):
+        perc_list = []
+        states = sna_policy_dict_candidate.keys()
+        for state in sna_policy_dict_candidate.values():
+            for ranges in state.values():
+                range_dic = ranges.range_dic
+                for percs in range_dic.values():
+                    perc_list.append(percs)
+        
+        # flat_perc_list = [item for sublist in perc_list for item in sublist]
+        return perc_list
 
-    def __call__(self, x):
+    def __call__(self, perc_array):
         # assert len(x) == self.dim
         # assert x.ndim == 1
         # assert np.all(x <= self.ub) and np.all(x >= self.lb)
@@ -100,6 +123,18 @@ class NashQEstimator:
         #     np.sum((w[1:self.dim - 1] - 1) ** 2 * (1 + 10 * np.sin(np.pi * w[1:self.dim - 1] + 1) ** 2)) + \
         #     (w[self.dim - 1] - 1) ** 2 * (1 + np.sin(2 * np.pi * w[self.dim - 1])**2)
         
-        value_vector, joint_action_vector = value_search_sample_policy_approx(self.env, self.sna_policy_dict, self.q_network)
+        # full rewrite, could be optimized
+        sna_policy_dict_update = copy.deepcopy(self.sna_policy_dict)
+        for i in range(0, len(perc_array)):
+            state_rep, agent_index, perc_index = self.get_state_rep_from_index(i)
+            state_agent_info = sna_policy_dict_update[state_rep][agent_index]
+            keys = list(state_agent_info.range_dic.keys())
+            key = keys[perc_index]
+
+            d1 = sna_policy_dict_update[state_rep][agent_index].range_dic[key] 
+            sna_policy_dict_update[state_rep][agent_index].range_dic[key] = perc_array[i]
+            d2 = sna_policy_dict_update[state_rep][agent_index].range_dic[key]
+        
+        value_vector, joint_action_vector = value_search_sample_policy_approx(self.env, sna_policy_dict_update, self.q_network)
 
         return np.sum(value_vector)
