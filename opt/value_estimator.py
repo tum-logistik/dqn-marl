@@ -131,9 +131,14 @@ class NashQEstimator:
             keys = list(state_agent_info.range_dic.keys())
             key = keys[perc_index]
 
-            d1 = sna_policy_dict_update[state_rep][agent_index].range_dic[key] 
+            d1 = sna_policy_dict_update[state_rep][agent_index].range_dic[key]
             sna_policy_dict_update[state_rep][agent_index].range_dic[key] = perc_array[i]
             d2 = sna_policy_dict_update[state_rep][agent_index].range_dic[key]
+
+        for state_rep in self.states:
+            for agent_index in range(self.n_agents):
+                new_range_dic = sna_policy_dict_update[state_rep][agent_index].range_dic
+                sna_policy_dict_update[state_rep][agent_index] = RangeMapDict(new_range_dic)
         
         value_vector, joint_action_vector = value_search_sample_policy_approx(self.env, sna_policy_dict_update, self.q_network)
 

@@ -60,13 +60,13 @@ def run_marl(MARLAgent,
     # s -> n -> a
     na_policy_dict = dict()
     for n in range(marketEnv.n_agents):
-        na_policy_dict[n] = neutral_policy_dic
+        na_policy_dict[n] = copy.deepcopy(neutral_policy_dic)
 
     # everyone same policy
     sna_policy_dict = dict()
     for s in range(marketEnv.state_space_size):
         key = repr(list(marketEnv.state_space[s]))
-        sna_policy_dict[key] = na_policy_dict
+        sna_policy_dict[key] = copy.deepcopy(na_policy_dict)
 
     state1_ = marketEnv.reset()
     for i in range(epochs):
