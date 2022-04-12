@@ -21,14 +21,14 @@ class Levy:
             (w[self.dim - 1] - 1) ** 2 * (1 + np.sin(2 * np.pi * w[self.dim - 1])**2)
         return val
 
-f = Levy(10)
+f = Levy(3240)
 
 turbo1 = Turbo1(
     f=f,  # Handle to objective function
     lb=f.lb,  # Numpy array specifying lower bounds
     ub=f.ub,  # Numpy array specifying upper bounds
     n_init=20,  # Number of initial bounds from an Latin hypercube design
-    max_evals = 1000,  # Maximum number of evaluations
+    max_evals = 200,  # Maximum number of evaluations
     batch_size=10,  # How large batch size TuRBO uses
     verbose=True,  # Print information from each batch
     use_ard=True,  # Set to true if you want to use ARD for the GP kernel

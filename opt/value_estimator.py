@@ -82,10 +82,11 @@ def value_search_sample_policy(env, sna_policy_dict, q_func_callback = convex_q_
     return value_vector, joint_action_vector
 
 class NashQEstimator:
-    def __init__(self, env, q_network, sna_policy_dict, max_iter = MC_MAX_ITER, dim = 10, n_agents = 3):
-        self.dim = dim
-        self.lb = -5 * np.ones(dim)
-        self.ub = 10 * np.ones(dim)
+    def __init__(self, env, q_network, sna_policy_dict, 
+                max_iter = MC_MAX_ITER, 
+                dim = None, 
+                n_agents = 3,
+                action_dim = 10): 
         self.max_iter = max_iter
         self.n_agents = n_agents
 
@@ -93,12 +94,20 @@ class NashQEstimator:
         self.q_network = q_network
         self.sna_policy_dict = sna_policy_dict # reverse array of percs to sna_policy_dict
         self.states = list(sna_policy_dict.keys())
+        self.action_dim = action_dim
+
+        if dim == None:
+            self.dim = len(self.states) * self.n_agents * 10
+        else:
+            self.dim = 300
+        self.lb = -5 * np.ones(self.dim)
+        self.ub = 10 * np.ones(self.dim)
     
     def get_state_rep_from_index(self, index):
-        state_index = int(index / (self.dim * self.n_agents))
-        agent_perc_index = index % (self.dim * self.n_agents)
-        agent_index = int(agent_perc_index / self.dim)
-        perc_index = agent_perc_index % self.dim
+        state_index = int(index / (self.action_dim * self.n_agents))
+        agent_perc_index = index % (self.action_dim * self.n_agents)
+        agent_index = int(agent_perc_index / self.action_dim)
+        perc_index = agent_perc_index % self.action_dim
         state_rep = self.states[state_index]
         return state_rep, agent_index, perc_index
     
@@ -142,4 +151,4 @@ class NashQEstimator:
         
         value_vector, joint_action_vector = value_search_sample_policy_approx(self.env, sna_policy_dict_update, self.q_network)
 
-        return np.sum(value_vector)
+        return -np.sum(value_vector)
