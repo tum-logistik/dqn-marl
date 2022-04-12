@@ -63,11 +63,13 @@ def perturb_policy(policy_dic, st_dev = 0.03):
     
     return policy_dic
 
-def turbo_optimize(env, sna_policy_dict, q_network_input = None, k_max = K_MAX_SA):
+def turbo_optimize(env, sna_policy_dict, q_network, k_max = K_MAX_SA):
     
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
-    nqe = NashQEstimator(env, q_network_input, sna_policy_dict_iter)
-    flat_sna_policy_dict_candidate = nqe.get_flattened_policy_dict(sna_policy_dict_iter)
+    nqe = NashQEstimator(env, q_network, sna_policy_dict_iter)
+
+    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter, q_network = q_network)
+    # flat_sna_policy_dict_candidate = nqe.get_flattened_policy_dict(sna_policy_dict_iter)
     # value = nqe(flat_sna_policy_dict_candidate)
 
     turbo1 = Turbo1(
@@ -92,6 +94,12 @@ def turbo_optimize(env, sna_policy_dict, q_network_input = None, k_max = K_MAX_S
     fX = turbo1.fX  # Observed values
     ind_best = np.argmin(fX)
     f_best, x_best = fX[ind_best], X[ind_best, :]
+
+    # retrieve epsilon
+    sna_policy_bbo = nqe.get_sna_policy_dict(X)
+    value_vector_bbo, joint_action_vector_bbo = value_search_sample_policy_approx(env, sna_policy_bbo, q_network = q_network)
+    epsilon = value_vector_bbo - value_initial_policy
+    
 
     return f_best, x_best
 

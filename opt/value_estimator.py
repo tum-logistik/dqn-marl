@@ -97,7 +97,7 @@ class NashQEstimator:
         self.action_dim = action_dim
 
         if dim == None:
-            self.dim = len(self.states) * self.n_agents * 10
+            self.dim = len(self.states) * self.n_agents * self.action_dim
         else:
             self.dim = 300
         self.lb = -5 * np.ones(self.dim)
@@ -123,15 +123,7 @@ class NashQEstimator:
         # flat_perc_list = [item for sublist in perc_list for item in sublist]
         return perc_list
 
-    def __call__(self, perc_array):
-        # assert len(x) == self.dim
-        # assert x.ndim == 1
-        # assert np.all(x <= self.ub) and np.all(x >= self.lb)
-        # w = 1 + (x - 1.0) / 4.0
-        # val = np.sin(np.pi * w[0]) ** 2 + \
-        #     np.sum((w[1:self.dim - 1] - 1) ** 2 * (1 + 10 * np.sin(np.pi * w[1:self.dim - 1] + 1) ** 2)) + \
-        #     (w[self.dim - 1] - 1) ** 2 * (1 + np.sin(2 * np.pi * w[self.dim - 1])**2)
-        
+    def get_sna_policy_dict(self, perc_array):
         # full rewrite, could be optimized
         sna_policy_dict_update = copy.deepcopy(self.sna_policy_dict)
         for i in range(0, len(perc_array)):
@@ -140,15 +132,19 @@ class NashQEstimator:
             keys = list(state_agent_info.range_dic.keys())
             key = keys[perc_index]
 
-            d1 = sna_policy_dict_update[state_rep][agent_index].range_dic[key]
+            # d1 = sna_policy_dict_update[state_rep][agent_index].range_dic[key]
             sna_policy_dict_update[state_rep][agent_index].range_dic[key] = perc_array[i]
-            d2 = sna_policy_dict_update[state_rep][agent_index].range_dic[key]
+            # d2 = sna_policy_dict_update[state_rep][agent_index].range_dic[key]
 
         for state_rep in self.states:
             for agent_index in range(self.n_agents):
                 new_range_dic = sna_policy_dict_update[state_rep][agent_index].range_dic
                 sna_policy_dict_update[state_rep][agent_index] = RangeMapDict(new_range_dic)
+        return sna_policy_dict_update
+
+    def __call__(self, perc_array):
         
+        sna_policy_dict_update = self.get_sna_policy_dict(perc_array)
         value_vector, joint_action_vector = value_search_sample_policy_approx(self.env, sna_policy_dict_update, self.q_network)
 
         return -np.sum(value_vector)
