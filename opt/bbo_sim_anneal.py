@@ -68,7 +68,7 @@ def turbo_optimize(env, sna_policy_dict, q_network, k_max = K_MAX_SA):
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
     nqe = NashQEstimator(env, q_network, sna_policy_dict_iter)
 
-    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter, q_network = q_network)
+    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter, q_network_input = q_network)
     # flat_sna_policy_dict_candidate = nqe.get_flattened_policy_dict(sna_policy_dict_iter)
     # value = nqe(flat_sna_policy_dict_candidate)
 
@@ -77,7 +77,7 @@ def turbo_optimize(env, sna_policy_dict, q_network, k_max = K_MAX_SA):
         lb=nqe.lb,  # Numpy array specifying lower bounds
         ub=nqe.ub,  # Numpy array specifying upper bounds
         n_init=20,  # Number of initial bounds from an Latin hypercube design
-        max_evals = 200,  # Maximum number of evaluations
+        max_evals = 100,  # Maximum number of evaluations
         batch_size=10,  # How large batch size TuRBO uses
         verbose=True,  # Print information from each batch
         use_ard=True,  # Set to true if you want to use ARD for the GP kernel
@@ -97,7 +97,7 @@ def turbo_optimize(env, sna_policy_dict, q_network, k_max = K_MAX_SA):
 
     # retrieve epsilon
     sna_policy_bbo = nqe.get_sna_policy_dict(X)
-    value_vector_bbo, joint_action_vector_bbo = value_search_sample_policy_approx(env, sna_policy_bbo, q_network = q_network)
+    value_vector_bbo, joint_action_vector_bbo = value_search_sample_policy_approx(env, sna_policy_bbo, q_network_input = q_network)
     epsilon = value_vector_bbo - value_initial_policy
     
 
@@ -106,7 +106,7 @@ def turbo_optimize(env, sna_policy_dict, q_network, k_max = K_MAX_SA):
 
 def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q_network_input = None):
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
-    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter)
+    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter, q_network_input = q_network_input)
     value_cur_policy = value_initial_policy
     epsilon = np.ones(env.state_space_size)*np.Inf
     for k in range(k_max):
@@ -120,7 +120,7 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q
                 pol_dic = perturb_policy(sna_policy_dict_iter[state_key][n])
                 sna_policy_dict_candidate[state_key][n] = copy.deepcopy(pol_dic)
         
-        value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate, q_network = q_network_input)
+        value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate, q_network_input = q_network_input)
 
         if accept_prob(value_cur_policy, value_candidate_policy, T) > np.random.uniform(0, 1):
             sna_policy_dict_iter = sna_policy_dict_candidate
