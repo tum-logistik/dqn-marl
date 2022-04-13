@@ -63,46 +63,6 @@ def perturb_policy(policy_dic, st_dev = 0.03):
     
     return policy_dic
 
-def turbo_optimize(env, sna_policy_dict, q_network, k_max = K_MAX_SA):
-    
-    sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
-    nqe = NashQEstimator(env, q_network, sna_policy_dict_iter)
-
-    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter, q_network_input = q_network)
-    # flat_sna_policy_dict_candidate = nqe.get_flattened_policy_dict(sna_policy_dict_iter)
-    # value = nqe(flat_sna_policy_dict_candidate)
-
-    turbo1 = Turbo1(
-        f=nqe,  # Handle to objective function
-        lb=nqe.lb,  # Numpy array specifying lower bounds
-        ub=nqe.ub,  # Numpy array specifying upper bounds
-        n_init=20,  # Number of initial bounds from an Latin hypercube design
-        max_evals = 100,  # Maximum number of evaluations
-        batch_size=10,  # How large batch size TuRBO uses
-        verbose=True,  # Print information from each batch
-        use_ard=True,  # Set to true if you want to use ARD for the GP kernel
-        max_cholesky_size=2000,  # When we switch from Cholesky to Lanczos
-        n_training_steps=50,  # Number of steps of ADAM to learn the hypers
-        min_cuda=1024,  # Run on the CPU for small datasets
-        device="cpu",  # "cpu" or "cuda"
-        dtype="float64",  # float64 or float32
-    )
-
-    turbo1.optimize()
-    
-    X = turbo1.X  # Evaluated points
-    fX = turbo1.fX  # Observed values
-    ind_best = np.argmin(fX)
-    f_best, x_best = fX[ind_best], X[ind_best, :]
-
-    # retrieve epsilon
-    sna_policy_bbo = nqe.get_sna_policy_dict(X)
-    value_vector_bbo, joint_action_vector_bbo = value_search_sample_policy_approx(env, sna_policy_bbo, q_network_input = q_network)
-    epsilon = value_vector_bbo - value_initial_policy
-    
-
-    return f_best, x_best
-
 
 def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q_network_input = None):
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)

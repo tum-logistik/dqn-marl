@@ -9,6 +9,7 @@ from common.properties import *
 from dqn.dqn_net import DQNNet
 from common.hash_functions import *
 from opt.bbo_sim_anneal import *
+from opt.bbo_tro import *
 # from dataclasses import dataclass
 
 class ResultObj:
@@ -111,9 +112,9 @@ def run_marl(MARLAgent,
             joint_action_index = np.zeros(np.power(marketEnv.action_size, marketEnv.n_agents)).reshape(-1)
             joint_action_index[nn_index] = 1
 
-            epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
+            # epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
 
-            value_sum_bbo, policy_bbo =  turbo_optimize(marketEnv, sna_policy_dict, MARLAgent)
+            epsilon_nash_arr, value_sum_bbo, policy_bbo, sna_policy_dict_iter =  turbo_optimize(marketEnv, sna_policy_dict, MARLAgent)
 
             state1_index = list(sna_policy_dict.keys()).index(repr(list(state1_np)))
             # epsilon_nash = np.sum(epsilon_nash_arr) # optimize for sum or epsilons
