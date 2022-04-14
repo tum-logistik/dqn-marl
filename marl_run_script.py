@@ -3,6 +3,8 @@ import numpy as np
 from dqn.marl_functions import *
 from dqn.marl_agent import *
 from environment.MarketEnv2 import *
+import pickle as pkl
+from datetime import datetime
 
 env = MarketEnv2(action_size = 10, 
                     n_agents = 3, 
@@ -10,7 +12,7 @@ env = MarketEnv2(action_size = 10,
                     max_demand = 3)
 
 marl_agent = MARLAgent(env)
-epochs_input = 120
+epochs_input = 2
 
 res = run_marl(marl_agent, 
                 marketEnv = env,
@@ -21,7 +23,9 @@ res = run_marl(marl_agent,
                 sync_freq = SYNC_FREQ,
                 agent_index = 0)
 
-env_id = "market-marl-nash-3-" + str(epochs_input)
+now = datetime.now()
+date_time = now.strftime("%m-%d-%Y-%H-%M-%S")
+env_id = "market-marl-nash-3-" + + str(epochs_input)
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, res.losses)
 np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, res.avg_epoch_rewards)
 
@@ -62,4 +66,9 @@ torch.save(marl_agent, "./output/%s_dqn_model"%env_id)
 # plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
 
 print("done")
+
+result_filename = "./output/%s_results.pkl"%env_id
+with open(result_filename, 'wb') as file:  # Overwrites any existing file.
+    # pkl.dump(res, file, pkl.HIGHEST_PROTOCOL)
+    pkl.dump(res, file)
 
