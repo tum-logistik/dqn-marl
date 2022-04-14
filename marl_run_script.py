@@ -10,7 +10,7 @@ env = MarketEnv2(action_size = 10,
                     max_demand = 3)
 
 marl_agent = MARLAgent(env)
-epochs_input = 190
+epochs_input = 120
 
 res = run_marl(marl_agent, 
                 marketEnv = env,
@@ -21,7 +21,7 @@ res = run_marl(marl_agent,
                 sync_freq = SYNC_FREQ,
                 agent_index = 0)
 
-env_id = "market-marl-nash-2-" + str(epochs_input)
+env_id = "market-marl-nash-3-" + str(epochs_input)
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, res.losses)
 np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, res.avg_epoch_rewards)
 
