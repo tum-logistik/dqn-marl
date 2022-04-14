@@ -25,7 +25,7 @@ res = run_marl(marl_agent,
 
 now = datetime.now()
 date_time = now.strftime("%m-%d-%Y-%H-%M-%S")
-env_id = "market-marl-nash-3-" + + str(epochs_input)
+env_id = "market-marl-nash-3-" + date_time + str(epochs_input)
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, res.losses)
 np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, res.avg_epoch_rewards)
 
