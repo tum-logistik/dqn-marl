@@ -12,7 +12,7 @@ env = MarketEnv2(action_size = 10,
                     max_demand = 3)
 
 marl_agent = MARLAgent(env)
-epochs_input = 2
+epochs_input = 110
 
 res = run_marl(marl_agent, 
                 marketEnv = env,
