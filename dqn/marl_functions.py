@@ -71,6 +71,7 @@ def run_marl(MARLAgent,
 
     state1_ = marketEnv.reset()
     for i in range(epochs):
+        print("#### Epoch Number: " + str(i))
         
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         
