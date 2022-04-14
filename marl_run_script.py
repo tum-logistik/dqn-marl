@@ -10,44 +10,47 @@ env = MarketEnv2(action_size = 10,
                     max_demand = 3)
 
 marl_agent = MARLAgent(env)
+epochs_input = 190
 
-# episode_rewards, epoch_rewards, global_rewards, agent_rewards, losses, losses_eps, losses_nash
 res = run_marl(marl_agent, 
                 marketEnv = env,
                 batch_size = BATCH_SIZE,
-                epochs = EPOCHS,
+                epochs = epochs_input,
                 explore_epsilon = EXPLORE_EPSILON,
                 max_steps = MAX_STEPS,
                 sync_freq = SYNC_FREQ,
                 agent_index = 0)
 
-env_id = "market-marl-nash"
+env_id = "market-marl-nash-2-" + str(epochs_input)
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, res.losses)
-np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, res.epoch_rewards)
+np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, res.avg_epoch_rewards)
 
 plt.figure(figsize=(10,7))
 plt.plot(res.losses)
-plt.xlabel("Episodes",fontsize=22)
-plt.ylabel("Loss",fontsize=22)
+plt.xlabel("Episodes", fontsize=22)
+plt.ylabel("Loss", fontsize=22)
 plt.savefig("./output/%s_dqn_losses.png"%env_id)
 
 plt.figure(figsize=(10,7))
-plt.plot(res.epoch_rewards)
+plt.plot(res.losses_eps)
+plt.xlabel("Episodes", fontsize=22)
+plt.ylabel("Loss", fontsize=22)
+plt.savefig("./output/%s_dqn_nash_losses.png"%env_id)
+
+plt.figure(figsize=(10,7))
+plt.plot(res.losses_nash)
+plt.xlabel("Episodes", fontsize=22)
+plt.ylabel("Loss", fontsize=22)
+plt.savefig("./output/%s_dqn_nash_losses.png"%env_id)
+
+plt.figure(figsize=(10,7))
+plt.plot(res.avg_epoch_rewards)
+# plt.plot(global_rewards)
+plt.plot(res.avg_epoch_rewards_agent)
 plt.xlabel("Epochs",fontsize=22)
 plt.ylabel("Avg Reward",fontsize=22)
 plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
 
-# episode_rewards_eval, epoch_rewards_eval = run_dqn_eval(DQNModel, 
-#                                               marketEnv = MarketEnv(action_size = ACTION_DIM), 
-#                                               epochs = 4000, 
-#                                               max_steps = MAX_STEPS)
-
-# plt.figure(figsize=(10,7))
-# plt.plot(epoch_rewards_eval)
-# plt.xlabel("Epochs",fontsize=22)
-# plt.ylabel("Avg Reward",fontsize=22)
-
-# perhaps pickle and save the model
 torch.save(marl_agent, "./output/%s_dqn_model"%env_id)
 # dqn2 = torch.load("./output/%s_dqn_model.png"%env_id)
 
@@ -57,8 +60,6 @@ torch.save(marl_agent, "./output/%s_dqn_model"%env_id)
 # plt.xlabel("Epochs",fontsize=22)
 # plt.ylabel("Avg Reward",fontsize=22)
 # plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
-
-np.mean(res.epoch_rewards)
 
 print("done")
 
