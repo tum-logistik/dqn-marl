@@ -65,10 +65,9 @@ torch.save(marl_agent, "./output/%s_dqn_model"%env_id)
 # plt.ylabel("Avg Reward",fontsize=22)
 # plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
 
-print("done")
-
 result_filename = "./output/%s_results.pkl"%env_id
 with open(result_filename, 'wb') as file:  # Overwrites any existing file.
     # pkl.dump(res, file, pkl.HIGHEST_PROTOCOL)
     pkl.dump(res, file)
 
+print("done")
