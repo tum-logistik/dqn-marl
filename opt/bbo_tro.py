@@ -87,7 +87,7 @@ def turbo_optimize(env, sna_policy_dict, q_network, k_max = K_MAX_SA):
         lb=nqe.lb,  # Numpy array specifying lower bounds
         ub=nqe.ub,  # Numpy array specifying upper bounds
         n_init=20,  # Number of initial bounds from an Latin hypercube design
-        max_evals = 200,  # Maximum number of evaluations
+        max_evals = 23,  # Maximum number of evaluations
         batch_size=10,  # How large batch size TuRBO uses
         verbose=True,  # Print information from each batch
         use_ard=True,  # Set to true if you want to use ARD for the GP kernel
@@ -106,7 +106,7 @@ def turbo_optimize(env, sna_policy_dict, q_network, k_max = K_MAX_SA):
     f_best, x_best = fX[ind_best], X[ind_best, :]
 
     # retrieve epsilon
-    sna_policy_bbo = nqe.get_sna_policy_dict(X)
+    sna_policy_bbo = nqe.get_sna_policy_dict(x_best)
     value_vector_bbo, joint_action_vector_bbo = value_search_sample_policy_approx(env, sna_policy_bbo, q_network_input = q_network)
     epsilon = value_vector_bbo - value_initial_policy
 
