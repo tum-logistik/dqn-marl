@@ -6,13 +6,13 @@ from environment.MarketEnv2 import *
 import pickle as pkl
 from datetime import datetime
 
-env = MarketEnv2(action_size = 10, 
-                    n_agents = 3, 
+env = MarketEnv2(action_size = ACTION_DIM, 
+                    n_agents = N_AGENTS, 
                     max_inventory = 0, 
-                    max_demand = 3)
+                    max_demand = MAX_DEMAND)
 
 marl_agent = MARLAgent(env)
-epochs_input = 450
+epochs_input = EPOCHS
 
 res = run_marl(marl_agent, 
                 marketEnv = env,
