@@ -24,8 +24,8 @@ class NashQEstimator:
             self.dim = len(self.states) * self.n_agents * self.action_dim
         else:
             self.dim = 300
-        self.lb = -5 * np.ones(self.dim)
-        self.ub = 10 * np.ones(self.dim)
+        self.lb = 0.0 * np.ones(self.dim)
+        self.ub = 1.0 * np.ones(self.dim)
     
     def get_state_rep_from_index(self, index):
         state_index = int(index / (self.action_dim * self.n_agents))
@@ -64,6 +64,7 @@ class NashQEstimator:
             for agent_index in range(self.n_agents):
                 new_range_dic = sna_policy_dict_update[state_rep][agent_index].range_dic
                 sna_policy_dict_update[state_rep][agent_index].range_dic_perc = RangeMapDict(new_range_dic).range_dic_perc
+        
         return sna_policy_dict_update
 
     def __call__(self, perc_array):
