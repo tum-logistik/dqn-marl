@@ -15,7 +15,7 @@ else:
 BATCH_SIZE = 25
 
 # DQN Iterative Parameters
-EPOCHS = 2
+EPOCHS = 120
 EXPLORE_EPSILON = 0.05
 MAX_STEPS = 25
 SYNC_FREQ = 40
