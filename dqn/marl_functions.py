@@ -21,6 +21,9 @@ class ResultObj:
     losses_eps: np.array
     losses_nash: np.array
     sna_policy_dict_iter: dict
+    mdp_env: any
+    marl_params: dict
+    state_tracker: np.array
 
 def build_one_hot(n, size):
     arr = np.zeros(size)
@@ -74,12 +77,14 @@ def run_marl(MARLAgent,
         print("#### Epoch Number: " + str(i))
         
         state1 = torch.from_numpy(state1_).float().to(device = devid)
-        
         status = 1
         mov = 0
         rewards = []
-        
-        while(status == 1): 
+        state_tracker = []
+
+        while(status == 1):
+
+            state_tracker.append(marketEnv.current_state[-1]) # append the reference price (state)
             j += 1
             mov += 1
             
@@ -188,6 +193,20 @@ def run_marl(MARLAgent,
     res.losses_eps = np.array(losses_eps)
     res.losses_nash = np.array(losses_nash)
     res.sna_policy_dict_iter = sna_policy_dict_iter
+    res.mdp_env = marketEnv
+    res.state_tracker = state_tracker
+
+    marl_params = {
+        "epochs": epochs,
+        "explore_epsilon": explore_epsilon,
+        "max_steps": max_steps,
+        "sync_freq": sync_freq,
+        "mem_size": MEM_SIZE,
+        "turbo_max_evals": TURBO_MAX_EVALS,
+        "turbo_batch_size": TURBO_MAX_EVALS,
+        "turbo_n_init": TURBO_MAX_EVALS
+    }
+    res.marl_params = marl_params
 
     return res
 
