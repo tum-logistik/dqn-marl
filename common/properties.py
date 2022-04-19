@@ -12,10 +12,10 @@ else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-BATCH_SIZE = 25
+BATCH_SIZE = 2
 
 # DQN Iterative Parameters
-EPOCHS = 120
+EPOCHS = 5
 EXPLORE_EPSILON = 0.05
 MAX_STEPS = 25
 SYNC_FREQ = 40
@@ -58,6 +58,6 @@ K_MAX_SA = 21
 MC_MAX_ITER = 99
 
 # TURBO TRO PARAMETERS
-TURBO_MAX_EVALS = 100
+TURBO_MAX_EVALS = 20
 TURBO_BATCH_SIZE = 5
 TURBO_N_INIT = 10

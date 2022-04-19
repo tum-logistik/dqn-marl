@@ -63,7 +63,8 @@ class NashQEstimator:
         for state_rep in self.states:
             for agent_index in range(self.n_agents):
                 new_range_dic = sna_policy_dict_update[state_rep][agent_index].range_dic
-                sna_policy_dict_update[state_rep][agent_index].range_dic_perc = RangeMapDict(new_range_dic).range_dic_perc
+                # sna_policy_dict_update[state_rep][agent_index].range_dic_perc = RangeMapDict(new_range_dic).range_dic_perc
+                sna_policy_dict_update[state_rep][agent_index] = RangeMapDict(new_range_dic)
         
         return sna_policy_dict_update
 

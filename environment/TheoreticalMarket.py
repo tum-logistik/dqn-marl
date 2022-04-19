@@ -1,5 +1,16 @@
 import numpy as np
 
+def get_eps_curves(ref_price, ref_price_mesh, market_prices, devs):
+    idx = (np.abs(ref_price_mesh[:, 0] - ref_price)).argmin()
+    closest_ref_price = ref_price_mesh[idx, 0]
+    nash_eps_curve = devs[idx]
+    return market_prices[idx], nash_eps_curve, closest_ref_price
+
+def get_eps0_range(ref_price, ref_price_mesh, market_prices, devs, eps_lim = 0.0001):
+    market_prices, nash_eps_curve, _ = get_eps_curves(ref_price, ref_price_mesh, market_prices, devs)
+    eps_idx = np.where(nash_eps_curve < eps_lim)
+    return np.min(market_prices[eps_idx]), np.max(market_prices[eps_idx])
+
 class TheoreticalMarket():
     def __init__(self,beta0 = 1, beta1 = -2, beta2 = -3, a = 0.03, ref_p = 1.5):
         self.beta0 = beta0
