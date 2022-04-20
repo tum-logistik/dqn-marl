@@ -9,7 +9,15 @@ from torch.quasirandom import SobolEngine
 
 from .gp import train_gp
 from .utils import from_unit_cube, latin_hypercube, to_unit_cube
+from common.properties import *
 
+def normalize_by_chunks_3d(arr, chunk_size = ACTION_DIM):
+    arr2 = arr.reshape(int(arr.shape[0]), int(arr.shape[1]/chunk_size), int(chunk_size))
+    d = arr2.sum(axis=2)
+    # norm = np.linalg.norm(arr2, axis=2, keepdims=True)
+    arr_chunk_norm = arr2 / d.reshape(int(arr.shape[0]), int(arr.shape[1]/chunk_size), 1)
+    arr3 = arr_chunk_norm.reshape(int(arr.shape[0]), int(arr.shape[1]))
+    return arr3
 
 class Turbo1:
     """The TuRBO-1 algorithm.
@@ -166,6 +174,9 @@ class Turbo1:
 
         # Create the trust region boundaries
         x_center = X[fX.argmin().item(), :][None, :]
+
+        
+
         weights = gp.covar_module.base_kernel.lengthscale.cpu().detach().numpy().ravel()
         weights = weights / weights.mean()  # This will make the next line more stable
         weights = weights / np.prod(np.power(weights, 1.0 / len(weights)))  # We now have weights.prod() = 1
@@ -177,6 +188,8 @@ class Turbo1:
         sobol = SobolEngine(self.dim, scramble=True, seed=seed)
         pert = sobol.draw(self.n_cand).to(dtype=dtype, device=device).cpu().detach().numpy()
         pert = lb + (ub - lb) * pert
+
+        
 
         # Create a perturbation mask
         prob_perturb = min(20.0 / self.dim, 1.0)
@@ -208,7 +221,10 @@ class Turbo1:
         # De-standardize the sampled values
         y_cand = mu + sigma * y_cand
 
-        return X_cand, y_cand, hypers
+        ## normalize x_center (action probabilities)
+        X_cand_norm = normalize_by_chunks_3d(X_cand)
+
+        return X_cand_norm, y_cand, hypers
 
     def _select_candidates(self, X_cand, y_cand):
         """Select candidates."""
