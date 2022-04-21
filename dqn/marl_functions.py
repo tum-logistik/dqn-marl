@@ -73,6 +73,8 @@ def run_marl(MARLAgent,
         sna_policy_dict[key] = copy.deepcopy(na_policy_dict)
 
     state1_ = marketEnv.reset()
+
+    state_tracker_epoch = []
     for i in range(epochs):
         print("#### Epoch Number: " + str(i))
         
@@ -118,10 +120,11 @@ def run_marl(MARLAgent,
             joint_action_index = np.zeros(np.power(marketEnv.action_size, marketEnv.n_agents)).reshape(-1)
             joint_action_index[nn_index] = 1
 
+            # Change to each agent, run an optimization!
             # epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
-
             epsilon_nash_arr, value_sum_bbo, policy_bbo, sna_policy_dict_iter =  turbo_optimize(marketEnv, sna_policy_dict, MARLAgent)
 
+            
             # state-by-state maximization, single agent deviation -> epsilon
 
             state1_index = list(sna_policy_dict.keys()).index(repr(list(state1_np)))
@@ -180,6 +183,8 @@ def run_marl(MARLAgent,
                 episode_rewards_agent.append(agent_episode_reward)
                 status = 0
                 mov = 0
+
+                state_tracker_epoch.append(state_tracker)
         
         smoothing_factor = -50
         avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
@@ -196,7 +201,7 @@ def run_marl(MARLAgent,
     res.losses_nash = np.array(losses_nash)
     res.sna_policy_dict_iter = sna_policy_dict_iter
     res.mdp_env = marketEnv
-    res.state_tracker = state_tracker
+    res.state_tracker_epoch = state_tracker_epoch
 
     marl_params = {
         "epochs": epochs,
