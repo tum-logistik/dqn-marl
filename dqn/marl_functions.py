@@ -124,7 +124,7 @@ def run_marl(MARLAgent,
             # epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
             epsilon_nash_arr, value_sum_bbo, policy_bbo, sna_policy_dict_iter =  turbo_optimize(marketEnv, sna_policy_dict, MARLAgent)
 
-            
+
             # state-by-state maximization, single agent deviation -> epsilon
 
             state1_index = list(sna_policy_dict.keys()).index(repr(list(state1_np)))
@@ -172,9 +172,8 @@ def run_marl(MARLAgent,
 
                 if j % sync_freq == 0:
                     target_net.load_state_dict(MARLAgent.model.state_dict())
-
+            
             if np.sum(done) == marketEnv.n_agents or mov > max_steps:
-                
                 avg_episode_reward = np.mean(np.array(rewards))
                 sum_episode_reward = np.sum(np.array(rewards))
                 agent_episode_reward = np.array(rewards)[-1][agent_index] # single agent reward (agent of interest)
