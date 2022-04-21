@@ -8,6 +8,17 @@ from collections import deque
 from environment.MarketEnv import MarketEnv
 from common.properties import *
 
+def reform_combination_n_probs(arr, n_agents = N_AGENTS, action_dim = ACTION_DIM):
+    arr1 = arr.reshape(int(n_agents), int(action_dim))
+    exploded_arr = np.array(np.meshgrid(*arr1 )).T.reshape(-1, int(n_agents))
+    return exploded_arr
+
+def batch_nprob_reform(batch, batch_size = BATCH_SIZE, n_agents = N_AGENTS, action_dim = ACTION_DIM):
+    batch2 = batch.reshape(int(batch_size), int(n_agents*action_dim) )
+    v1 = np.apply_along_axis(reform_combination_n_probs, 1, batch2)
+    # v1 = reform_combination_n_probs_vec(batch)
+    return v1
+
 class DQNNet():
 
     def __init__(self, state_dim, output_size, 
@@ -87,7 +98,17 @@ class DQNNet():
             # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
             epsilon_policy_batch.requires_grad=True
             loss_nash = self.loss_fn(epsilon_policy_batch, nash_policy_pred)
-            
+
+            nash_policy_pred_np = nash_policy_pred.detach()
+            nash_policy_pred_nagent_np = nash_policy_pred_np.reshape(int(BATCH_SIZE), int(self.n_agents), int(ACTION_DIM))
+
+            nash_probs = batch_nprob_reform(nash_policy_pred_nagent_np)
+            # indexed_nash_scalar = np.apply_over_axes(np.multiply, nash_probs, 1)
+
+            indexed_nash_scalar = np.multiply.reduce(nash_probs, axis=(2))
+            nash_scalar_torch = torch.from_numpy(indexed_nash_scalar)
+            scaled_q_func = nash_scalar_torch * Q2
+
             # Q Function Net
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * max_Q2)
