@@ -110,7 +110,7 @@ class DQNNet():
             scaled_q_func = nash_scalar_torch * Q2
 
             # Q Function Net
-            max_Q2 = torch.max(Q2,dim=1)[0]
+            max_Q2 = torch.max(scaled_q_func,dim=1)[0]
             Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * max_Q2)
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
 
