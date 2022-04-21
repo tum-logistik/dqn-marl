@@ -82,6 +82,12 @@ class DQNNet():
             Q2 = target_net(state2_batch).to(device = devid)
         
         if self.n_agents > 1:
+            # Nash Policy Net
+            nash_policy_pred = self.nash_policy_model(state1_batch)
+            # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
+            epsilon_policy_batch.requires_grad=True
+            loss_nash = self.loss_fn(epsilon_policy_batch, nash_policy_pred)
+            
             # Q Function Net
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * max_Q2)
@@ -92,11 +98,7 @@ class DQNNet():
             epsilon_nash_batch.requires_grad=True
             loss_eps = self.loss_fn(epsilon_nash_batch, eps_pred)
 
-            # Nash Policy Net
-            nash_policy_pred = self.nash_policy_model(state1_batch)
-            # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
-            epsilon_policy_batch.requires_grad=True
-            loss_nash = self.loss_fn(epsilon_policy_batch, nash_policy_pred)
+            
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * max_Q2)
