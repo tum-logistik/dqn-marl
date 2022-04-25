@@ -154,15 +154,17 @@ def run_marl(MARLAgent,
                 
                 # Q learning
                 MARLAgent.optimizer.zero_grad()
-                loss.backward()
+                loss.backward(retain_graph=True)
                 losses.append(loss.item())
                 MARLAgent.optimizer.step()
 
                 # Eps learning
                 MARLAgent.eps_optimizer.zero_grad()
-                loss_eps.backward()
+                loss_eps.backward(retain_graph=True)
                 losses_eps.append(loss_eps.item())
                 MARLAgent.eps_optimizer.step()
+                
+                if devid == torch.device('cuda:0'): torch.cuda.empty_cache()
 
                 # Nash learning
                 MARLAgent.nash_optimizer.zero_grad()
