@@ -100,7 +100,7 @@ class DQNNet():
             nash_policy_batch.requires_grad=True
             loss_nash = self.loss_fn(nash_policy_batch, nash_policy_pred)
 
-            nash_policy_pred_np = nash_policy_pred.detach()
+            nash_policy_pred_np = nash_policy_pred.cpu().detach().numpy()
             nash_policy_pred_nagent_np = nash_policy_pred_np.reshape(int(BATCH_SIZE), int(self.n_agents), int(ACTION_DIM))
 
             nash_probs = batch_nprob_reform(nash_policy_pred_nagent_np)
