@@ -166,7 +166,7 @@ def run_marl(MARLAgent,
 
                 # Nash learning
                 MARLAgent.nash_optimizer.zero_grad()
-                loss_nash.backward()
+                loss_nash.backward(retain_graph=True)
                 losses_nash.append(loss_nash.item())
                 MARLAgent.nash_optimizer.step()
 
