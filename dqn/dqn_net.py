@@ -47,11 +47,11 @@ class DQNNet():
         self.n_agents = n_agents
         self.action_space_size = action_space_size
         self.state_space_size = state_space_size
-        self.comb_action_space = int(np.power(self.action_space_size, self.n_agents))
+        self.joint_action_space_size = int(self.action_space_size * self.n_agents)
         
         if self.n_agents > 1:
             self.nash_eps_net = self.nash_policy_model = torch.nn.Sequential(
-                torch.nn.Linear(self.comb_action_space, hidden_size),
+                torch.nn.Linear(int(self.action_space_size * self.n_agents), hidden_size),
                 torch.nn.ReLU(),
                 torch.nn.Linear(hidden_size, hidden_size*20),
                 torch.nn.ReLU(),
@@ -94,6 +94,21 @@ class DQNNet():
             Q2 = target_net(state2_batch).to(device = devid)
         
         if self.n_agents > 1:
+
+            # Minimizing solution to Epsilon Net, to get policy
+            # self.nash_eps_net.requires_grad=False
+            # x = torch.nn.Parameter(torch.rand(self.joint_action_space_size), requires_grad=True)
+            # policy_optim = torch.optim.SGD([x], lr=1e-1)
+            # policy_mse = torch.nn.MSELoss()
+            # zeros_eps = torch.zeros(self.state_space_size).float().to(device = devid)
+
+            # for _ in range(EPSNET_OPTIM_STEPS):
+            #     loss_eps_pol = policy_mse(self.nash_eps_net(x), zeros_eps)
+            #     loss_eps_pol.backward()
+            #     policy_optim.step()
+            #     policy_optim.zero_grad()
+            
+
             # Nash Policy Net: state -> policy
             nash_policy_pred = self.nash_policy_model(state1_batch)
             # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
@@ -107,7 +122,7 @@ class DQNNet():
             # indexed_nash_scalar = np.apply_over_axes(np.multiply, nash_probs, 1)
 
             indexed_nash_scalar = np.multiply.reduce(nash_probs, axis=(2))
-            nash_scalar_torch = torch.from_numpy(indexed_nash_scalar)
+            nash_scalar_torch = torch.from_numpy(indexed_nash_scalar).float().to(device = devid)
             scaled_q_func = nash_scalar_torch * Q2
 
             # Q Function Net, state -> Nash Q
@@ -116,10 +131,9 @@ class DQNNet():
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
 
             # Epsilon Net: policy -> epsilon, optimize over the epsilon net
-            eps_pred = self.nash_eps_net(scaled_q_func)
+            eps_pred = self.nash_eps_net(nash_policy_pred)
             epsilon_state_batch.requires_grad=True
             loss_eps = self.loss_fn(epsilon_state_batch, eps_pred)
-            # Minimizing solution to Epsilon Net
                     
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
