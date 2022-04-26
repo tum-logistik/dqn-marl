@@ -129,7 +129,7 @@ def run_marl(MARLAgent,
 
             state1_index = list(sna_policy_dict.keys()).index(repr(list(state1_np)))
             # epsilon_nash = np.sum(epsilon_nash_arr) # optimize for sum or epsilons
-            epsilon_nash = epsilon_nash_arr[state1_index] # optimize for state's epsilon value
+            # epsilon_nash = epsilon_nash_arr[state1_index] # optimize for state's epsilon value
             na_policy_dict_epsmax = sna_policy_dict_iter[dic_key]
             na_policy_dict_epsmax_array = np.array([list(na_policy_dict_epsmax[k].range_dic.values()) for k in na_policy_dict_epsmax]).flatten()
 
