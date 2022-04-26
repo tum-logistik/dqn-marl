@@ -126,15 +126,15 @@ class DQNNet():
             scaled_q_func = nash_scalar_torch * Q2
 
             # Q Function Net, state -> Nash Q
-            max_Q2 = torch.max(scaled_q_func,dim=1)[0]
-            Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * max_Q2)
+            nash_Q2 = torch.max(scaled_q_func,dim=1)[0]
+            Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * nash_Q2)
             Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
 
             # Epsilon Net: policy -> epsilon, optimize over the epsilon net
             eps_pred = self.nash_eps_net(nash_policy_pred)
             epsilon_state_batch.requires_grad=True
             loss_eps = self.loss_fn(epsilon_state_batch, eps_pred)
-                    
+            
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * max_Q2)
