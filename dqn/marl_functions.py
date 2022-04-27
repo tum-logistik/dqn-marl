@@ -176,10 +176,10 @@ def run_marl(MARLAgent,
                     target_net.load_state_dict(MARLAgent.model.state_dict())
             
             if np.sum(done) == marketEnv.n_agents or mov > max_steps:
-                avg_episode_reward = np.mean(np.array(rewards))
+                # avg_episode_reward = np.mean(np.array(rewards))
                 sum_episode_reward = np.sum(np.array(rewards))
                 agent_episode_reward = np.array(rewards)[-1][agent_index] # single agent reward (agent of interest)
-                episode_rewards.append(avg_episode_reward)
+                episode_rewards.append(np.array(rewards))
                 episode_rewards_sum.append(sum_episode_reward)
                 episode_rewards_agent.append(agent_episode_reward)
                 status = 0
