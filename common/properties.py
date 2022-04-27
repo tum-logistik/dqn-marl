@@ -12,18 +12,18 @@ else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-BATCH_SIZE = 10
+BATCH_SIZE = 50
 
 # DQN Iterative Parameters
-EPOCHS = 90
-SYNC_FREQ = 10
+EPOCHS = 250
+SYNC_FREQ = 30
 EXPLORE_EPSILON = 0.05
 MAX_STEPS = 30
 MEM_SIZE = 101333
 replay = deque(maxlen = MEM_SIZE)
 
 # DQN Parameters
-HIDDEN_SIZE = 50
+HIDDEN_SIZE = 120
 GAMMA = 0.8
 DEFAULT_LOSS_FUNC = torch.nn.HuberLoss()
 LEARNING_RATE = 1e-3
