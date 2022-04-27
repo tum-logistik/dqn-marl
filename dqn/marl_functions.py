@@ -212,7 +212,8 @@ def run_marl(MARLAgent,
         "mem_size": MEM_SIZE,
         "turbo_max_evals": TURBO_MAX_EVALS,
         "turbo_batch_size": TURBO_MAX_EVALS,
-        "turbo_n_init": TURBO_MAX_EVALS
+        "turbo_n_init": TURBO_MAX_EVALS,
+        "batch_size": BATCH_SIZE
     }
     res.marl_params = marl_params
 
