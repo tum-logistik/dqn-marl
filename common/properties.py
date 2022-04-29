@@ -12,13 +12,13 @@ else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-BATCH_SIZE = 2
+BATCH_SIZE = 30
 
 # DQN Iterative Parameters
-EPOCHS = 4
-SYNC_FREQ = 3
+EPOCHS = 110
+SYNC_FREQ = 15
 EXPLORE_EPSILON = 0.05
-MAX_STEPS = 3
+MAX_STEPS = 50
 MEM_SIZE = 101333
 replay = deque(maxlen = MEM_SIZE)
 
