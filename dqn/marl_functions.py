@@ -24,6 +24,7 @@ class ResultObj:
     mdp_env: any
     marl_params: dict
     state_tracker: np.array
+    episode_actions: np.array
 
 def build_one_hot(n, size):
     arr = np.zeros(size)
@@ -56,6 +57,8 @@ def run_marl(MARLAgent,
     avg_epoch_rewards_sum = []
     avg_epoch_rewards_agent = []
 
+    episode_actions = []
+
     losses = []
     losses_eps = []
     losses_nash = []
@@ -83,6 +86,7 @@ def run_marl(MARLAgent,
         mov = 0
         rewards = []
         state_tracker = []
+        joint_actions = []
 
         while(status == 1):
 
@@ -139,6 +143,7 @@ def run_marl(MARLAgent,
             state1 = state2
             
             rewards.append(joint_rewards)
+            joint_actions.append(agent_action_indices)
 
             # print out
             print(agent_action_indices)
@@ -191,6 +196,8 @@ def run_marl(MARLAgent,
         avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
         avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
         avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
+
+        episode_actions.append(joint_actions)
     
     res = ResultObj()
     res.episode_rewards = np.array(episode_rewards)
@@ -202,7 +209,8 @@ def run_marl(MARLAgent,
     res.losses_nash = np.array(losses_nash)
     res.sna_policy_dict_iter = sna_policy_dict_iter
     res.mdp_env = marketEnv
-    res.state_tracker_epoch = state_tracker_epoch
+    res.state_tracker = np.array(state_tracker_epoch)
+    res.episode_actions = np.array(episode_actions)
 
     marl_params = {
         "epochs": epochs,
