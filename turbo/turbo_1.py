@@ -248,8 +248,10 @@ class Turbo1:
             self._restart()
 
             # Generate and evalute initial design points
-            X_init = latin_hypercube(self.n_init, self.dim)
-            X_init = from_unit_cube(X_init, self.lb, self.ub)
+            X_init_cube = latin_hypercube(self.n_init, self.dim)
+            X_init_cube = from_unit_cube(X_init_cube, self.lb, self.ub)
+            X_init= normalize_by_chunks_3d(X_init_cube)
+            
             fX_init = np.array([[self.f(x)] for x in X_init])
 
             # Update budget and set as initial data for this TR
