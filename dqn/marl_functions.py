@@ -126,7 +126,7 @@ def run_marl(MARLAgent,
 
             # Change to each agent, run an optimization!
             # epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
-            epsilon_nash_arr, value_sum_bbo, policy_bbo, sna_policy_dict_iter = turbo_optimize(marketEnv, sna_policy_dict, MARLAgent)
+            epsilon_nash_arr, value_sum_bbo, policy_bbo, sna_policy_dict_iter = turbo_optimize_eps(marketEnv, sna_policy_dict, MARLAgent)
 
 
             # state-by-state maximization, single agent deviation -> epsilon

@@ -7,6 +7,7 @@ from matplotlib import pylab as plt
 from collections import deque
 from environment.MarketEnv import MarketEnv
 from common.properties import *
+from opt.bbo_tro import *
 
 def reform_combination_n_probs(arr, n_agents = N_AGENTS, action_dim = ACTION_DIM):
     arr1 = arr.reshape(int(n_agents), int(action_dim))
@@ -96,23 +97,32 @@ class DQNNet():
         if self.n_agents > 1:
 
             # Minimizing solution to Epsilon Net, to get policy
-            self.nash_eps_net.requires_grad=False
-            x = torch.nn.Parameter(torch.rand(self.joint_action_space_size), requires_grad=True)
-            policy_optim = torch.optim.SGD([x], lr=1e-1)
-            policy_mse = torch.nn.MSELoss()
-            zeros_eps = torch.zeros(self.state_space_size).float().to(device = devid)
+            # self.nash_eps_net.requires_grad=False
+            # x = torch.nn.Parameter(torch.rand(self.batch_size, self.joint_action_space_size), requires_grad=True)
+            # policy_optim = torch.optim.SGD([x], lr=1e-1)
+            # policy_mse = torch.nn.MSELoss()
+            # zeros_eps = torch.zeros(self.state_space_size).float().to(device = devid)
 
-            for _ in range(EPSNET_OPTIM_STEPS):
-                loss_eps_pol = policy_mse(self.nash_eps_net(x), zeros_eps)
-                loss_eps_pol.backward()
-                policy_optim.step()
-                policy_optim.zero_grad()
+            # for _ in range(EPSNET_OPTIM_STEPS):
+            #     loss_eps_pol = policy_mse(self.nash_eps_net(x), zeros_eps)
+            #     loss_eps_pol.backward()
+            #     policy_optim.step()
+            #     policy_optim.zero_grad()
+            
+            x_trial = np.ones(int(self.joint_action_space_size))*0.1
+            nash_pol_eps_min_batch = np.zeros([self.batch_size, self.joint_action_space_size])
+            for i in range(nash_pol_eps_min_batch.shape[0]):
+                state_from_batch = state1_batch[i].cpu().detach().numpy()
+                _, nash_pol_eps_min_batch[i], _ = turbo_optimize_nash_pol(x_trial, self.nash_eps_net, state_from_batch)
+            
+            nash_pol_eps_min_batch_tens = torch.from_numpy(nash_pol_eps_min_batch).float().to(device = devid)
+            nash_pol_eps_min_batch_tens.requires_grad=True
             
             # Nash Policy Net: state -> policy
             nash_policy_pred = self.nash_policy_model(state1_batch)
             # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
-            nash_policy_batch.requires_grad=True
-            loss_nash = self.loss_fn(nash_policy_batch, nash_policy_pred)
+            
+            loss_nash = self.loss_fn(nash_pol_eps_min_batch_tens, nash_policy_pred)
 
             nash_policy_pred_np = nash_policy_pred.cpu().detach().numpy()
             nash_policy_pred_nagent_np = nash_policy_pred_np.reshape(int(BATCH_SIZE), int(self.n_agents), int(ACTION_DIM))
