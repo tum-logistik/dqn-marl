@@ -13,12 +13,19 @@ else:
 
 # Shared Parameters
 BATCH_SIZE = 30
+# BATCH_SIZE = 3
 
 # DQN Iterative Parameters
 EPOCHS = 110
+# EPOCHS = 4
+
 SYNC_FREQ = 15
+# SYNC_FREQ = 2
+
 EXPLORE_EPSILON = 0.05
 MAX_STEPS = 50
+# MAX_STEPS = 4
+
 MEM_SIZE = 101333
 replay = deque(maxlen = MEM_SIZE)
 
@@ -58,9 +65,9 @@ K_MAX_SA = 21
 MC_MAX_ITER = 99
 
 # TURBO TRO PARAMETERS
-TURBO_MAX_EVALS = 13
-TURBO_BATCH_SIZE = 4
-TURBO_N_INIT = 3
+TURBO_MAX_EVALS = 15
+TURBO_BATCH_SIZE = 3
+TURBO_N_INIT = 2
 
 # Epsilon net minimization
 EPSNET_OPTIM_STEPS = 15

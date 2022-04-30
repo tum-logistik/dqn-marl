@@ -96,19 +96,18 @@ class DQNNet():
         if self.n_agents > 1:
 
             # Minimizing solution to Epsilon Net, to get policy
-            # self.nash_eps_net.requires_grad=False
-            # x = torch.nn.Parameter(torch.rand(self.joint_action_space_size), requires_grad=True)
-            # policy_optim = torch.optim.SGD([x], lr=1e-1)
-            # policy_mse = torch.nn.MSELoss()
-            # zeros_eps = torch.zeros(self.state_space_size).float().to(device = devid)
+            self.nash_eps_net.requires_grad=False
+            x = torch.nn.Parameter(torch.rand(self.joint_action_space_size), requires_grad=True)
+            policy_optim = torch.optim.SGD([x], lr=1e-1)
+            policy_mse = torch.nn.MSELoss()
+            zeros_eps = torch.zeros(self.state_space_size).float().to(device = devid)
 
-            # for _ in range(EPSNET_OPTIM_STEPS):
-            #     loss_eps_pol = policy_mse(self.nash_eps_net(x), zeros_eps)
-            #     loss_eps_pol.backward()
-            #     policy_optim.step()
-            #     policy_optim.zero_grad()
+            for _ in range(EPSNET_OPTIM_STEPS):
+                loss_eps_pol = policy_mse(self.nash_eps_net(x), zeros_eps)
+                loss_eps_pol.backward()
+                policy_optim.step()
+                policy_optim.zero_grad()
             
-
             # Nash Policy Net: state -> policy
             nash_policy_pred = self.nash_policy_model(state1_batch)
             # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
