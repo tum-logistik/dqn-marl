@@ -109,12 +109,13 @@ class DQNNet():
             #     policy_optim.step()
             #     policy_optim.zero_grad()
             
+            ### TURBO for epsmin
+
             x_trial = np.ones(int(self.joint_action_space_size))*0.1
             nash_pol_eps_min_batch = np.zeros([self.batch_size, self.joint_action_space_size])
             for i in range(nash_pol_eps_min_batch.shape[0]):
                 state_from_batch = state1_batch[i].cpu().detach().numpy()
                 _, nash_pol_eps_min_batch[i], _ = turbo_optimize_nash_pol(x_trial, self.nash_eps_net, state_from_batch)
-            
             nash_pol_eps_min_batch_tens = torch.from_numpy(nash_pol_eps_min_batch).float().to(device = devid)
             nash_pol_eps_min_batch_tens.requires_grad=True
             
@@ -123,6 +124,7 @@ class DQNNet():
             # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
             
             loss_nash = self.loss_fn(nash_pol_eps_min_batch_tens, nash_policy_pred)
+            # loss_nash = self.loss_fn(nash_policy_batch, nash_policy_pred)
 
             nash_policy_pred_np = nash_policy_pred.cpu().detach().numpy()
             nash_policy_pred_nagent_np = nash_policy_pred_np.reshape(int(BATCH_SIZE), int(self.n_agents), int(ACTION_DIM))

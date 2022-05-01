@@ -2,11 +2,11 @@ from re import S
 import numpy as np
 from dqn.marl_functions import *
 from dqn.marl_agent import *
-from environment.MarketEnv2 import *
+from environment.MarketEnv import *
 import pickle as pkl
 from datetime import datetime
 
-env = MarketEnv2(action_size = ACTION_DIM, 
+env = MarketEnv(action_size = ACTION_DIM, 
                     n_agents = N_AGENTS, 
                     max_inventory = 0, 
                     max_demand = MAX_DEMAND)
