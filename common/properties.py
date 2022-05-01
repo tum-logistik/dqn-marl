@@ -5,6 +5,7 @@ import random
 from collections import deque
 import copy
 from common.RangeMap import *
+import yaml
 
 if torch.cuda.is_available():
     devid = torch.device('cuda:0')
@@ -12,25 +13,30 @@ else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-BATCH_SIZE = 100
+BATCH_SIZE = 3
 
 # DQN Iterative Parameters
-EPOCHS = 27
-EXPLORE_EPSILON = 0.1
-MAX_STEPS = 25
-SYNC_FREQ = 99
+EPOCHS = 100
+SYNC_FREQ = 2
+EXPLORE_EPSILON = 0.05
+MAX_STEPS = 20
+
 MEM_SIZE = 101333
 replay = deque(maxlen = MEM_SIZE)
 
 # DQN Parameters
-HIDDEN_SIZE = 200
+HIDDEN_SIZE = 75
 GAMMA = 0.8
 DEFAULT_LOSS_FUNC = torch.nn.HuberLoss()
 LEARNING_RATE = 1e-3
 
 # MDP Parameters
-ACTION_DIM = 301
+ACTION_DIM = 10
 STATE_DIM = 2
+N_AGENTS = 3
+
+# MARKET PARAMETERS
+MAX_DEMAND = 3
 
 range_dict = {
     (0, 1): 0.10,
@@ -52,3 +58,11 @@ K_MAX_SA = 21
 
 # MC PARAMETERS
 MC_MAX_ITER = 99
+
+# TURBO TRO PARAMETERS
+TURBO_MAX_EVALS = 5
+TURBO_BATCH_SIZE = 2
+TURBO_N_INIT = 2
+
+# Epsilon net minimization
+EPSNET_OPTIM_STEPS = 15

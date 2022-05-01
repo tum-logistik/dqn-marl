@@ -1,3 +1,4 @@
+# from turtle import st
 from common.RangeMap import *
 import numpy as np
 from opt.pseudo_q_generator import *
@@ -13,6 +14,7 @@ def q_function_wrapper(s, joint_actions, q_network):
     joint_actions_index = int(action_index_to_hash(joint_actions))
     q_vals = q_network(s)
     q_vals_np = q_vals.data.numpy() if not torch.cuda.is_available() else q_vals.data.cpu().numpy()
+
     return q_vals_np[joint_actions_index]
 
 def policy_scalar(env, sna_policy_dict, joint_actions, state):
@@ -26,7 +28,7 @@ def policy_scalar(env, sna_policy_dict, joint_actions, state):
     return prob_scalar
 
 
-def value_search_sample_policy_approx(env, sna_policy_dict, q_network = None, max_iter = MC_MAX_ITER):
+def value_search_sample_policy_approx(env, sna_policy_dict, q_network_input = None, max_iter = MC_MAX_ITER):
 
     value_vector = np.zeros(env.state_space_size)
     joint_action_vector = np.zeros([env.state_space_size, env.n_agents])
@@ -43,11 +45,11 @@ def value_search_sample_policy_approx(env, sna_policy_dict, q_network = None, ma
             state_key_np = np.array(state_keys[s])
             state_key_torch = torch.from_numpy(state_key_np).float().to(device = devid)
 
-            if q_network == None:
+            if q_network_input == None:
                 candidate_val = pol_scal * convex_q_gen(s, rand_joint_actions)
             else:
-                candidate_val = pol_scal * q_function_wrapper(state_key_torch, rand_joint_actions, q_network)
-
+                candidate_val = pol_scal * q_function_wrapper(state_key_torch, rand_joint_actions, q_network_input)
+            
             if candidate_val > max_val:
                 max_val = candidate_val
                 best_joint_action = rand_joint_actions

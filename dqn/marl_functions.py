@@ -9,6 +9,9 @@ from common.properties import *
 from dqn.dqn_net import DQNNet
 from common.hash_functions import *
 from opt.bbo_sim_anneal import *
+from opt.bbo_tro import *
+import time
+
 # from dataclasses import dataclass
 
 class ResultObj:
@@ -20,6 +23,10 @@ class ResultObj:
     losses_eps: np.array
     losses_nash: np.array
     sna_policy_dict_iter: dict
+    mdp_env: any
+    marl_params: dict
+    state_tracker: np.array
+    episode_actions: np.array
 
 def build_one_hot(n, size):
     arr = np.zeros(size)
@@ -52,6 +59,8 @@ def run_marl(MARLAgent,
     avg_epoch_rewards_sum = []
     avg_epoch_rewards_agent = []
 
+    episode_actions = []
+
     losses = []
     losses_eps = []
     losses_nash = []
@@ -60,24 +69,39 @@ def run_marl(MARLAgent,
     # s -> n -> a
     na_policy_dict = dict()
     for n in range(marketEnv.n_agents):
-        na_policy_dict[n] = neutral_policy_dic
+        na_policy_dict[n] = copy.deepcopy(neutral_policy_dic)
 
     # everyone same policy
     sna_policy_dict = dict()
     for s in range(marketEnv.state_space_size):
         key = repr(list(marketEnv.state_space[s]))
-        sna_policy_dict[key] = na_policy_dict
+        sna_policy_dict[key] = copy.deepcopy(na_policy_dict)
 
     state1_ = marketEnv.reset()
+
+    state_tracker_epoch = []
+
+    start_time = time.time()
+    last_time = start_time
+
     for i in range(epochs):
         
-        state1 = torch.from_numpy(state1_).float().to(device = devid)
+        print("#### Epoch Number: " + str(i))
+        cur_time = time.time()
+        print("Time from begining: " + str(cur_time - start_time))
+        print("Time per Epoch: " + str(cur_time - last_time))
+        last_time = cur_time 
         
+        state1 = torch.from_numpy(state1_).float().to(device = devid)
         status = 1
         mov = 0
         rewards = []
-        
-        while(status == 1): 
+        state_tracker = []
+        joint_actions = []
+
+        while(status == 1):
+
+            state_tracker.append(marketEnv.current_state[-1]) # append the reference price (state)
             j += 1
             mov += 1
             
@@ -111,10 +135,16 @@ def run_marl(MARLAgent,
             joint_action_index = np.zeros(np.power(marketEnv.action_size, marketEnv.n_agents)).reshape(-1)
             joint_action_index[nn_index] = 1
 
-            epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
+            # Change to each agent, run an optimization!
+            # epsilon_nash_arr, value_cur_policy, sna_policy_dict_iter = sim_anneal_optimize(marketEnv, sna_policy_dict, q_network_input = MARLAgent)
+            epsilon_nash_arr, value_sum_bbo, policy_bbo, sna_policy_dict_iter = turbo_optimize_eps(marketEnv, sna_policy_dict, MARLAgent)
+
+
+            # state-by-state maximization, single agent deviation -> epsilon
+
             state1_index = list(sna_policy_dict.keys()).index(repr(list(state1_np)))
             # epsilon_nash = np.sum(epsilon_nash_arr) # optimize for sum or epsilons
-            epsilon_nash = epsilon_nash_arr[state1_index] # optimize for state's epsilon value
+            # epsilon_nash = epsilon_nash_arr[state1_index] # optimize for state's epsilon value
             na_policy_dict_epsmax = sna_policy_dict_iter[dic_key]
             na_policy_dict_epsmax_array = np.array([list(na_policy_dict_epsmax[k].range_dic.values()) for k in na_policy_dict_epsmax]).flatten()
 
@@ -124,6 +154,7 @@ def run_marl(MARLAgent,
             state1 = state2
             
             rewards.append(joint_rewards)
+            joint_actions.append(agent_action_indices)
 
             # print out
             print(agent_action_indices)
@@ -139,40 +170,45 @@ def run_marl(MARLAgent,
                 
                 # Q learning
                 MARLAgent.optimizer.zero_grad()
-                loss.backward()
+                loss.backward(retain_graph=True)
                 losses.append(loss.item())
                 MARLAgent.optimizer.step()
 
                 # Eps learning
                 MARLAgent.eps_optimizer.zero_grad()
-                loss_eps.backward()
+                loss_eps.backward(retain_graph=True)
                 losses_eps.append(loss_eps.item())
                 MARLAgent.eps_optimizer.step()
+                
+                if devid == torch.device('cuda:0'): torch.cuda.empty_cache()
 
                 # Nash learning
                 MARLAgent.nash_optimizer.zero_grad()
-                loss_nash.backward()
+                loss_nash.backward(retain_graph=True)
                 losses_nash.append(loss_nash.item())
                 MARLAgent.nash_optimizer.step()
 
                 if j % sync_freq == 0:
                     target_net.load_state_dict(MARLAgent.model.state_dict())
-
-            if done or mov > max_steps:
-                
-                avg_episode_reward = np.mean(np.array(rewards))
+            
+            if np.sum(done) == marketEnv.n_agents or mov > max_steps:
+                # avg_episode_reward = np.mean(np.array(rewards))
                 sum_episode_reward = np.sum(np.array(rewards))
                 agent_episode_reward = np.array(rewards)[-1][agent_index] # single agent reward (agent of interest)
-                episode_rewards.append(avg_episode_reward)
+                episode_rewards.append(np.array(rewards))
                 episode_rewards_sum.append(sum_episode_reward)
                 episode_rewards_agent.append(agent_episode_reward)
                 status = 0
                 mov = 0
+
+                state_tracker_epoch.append(state_tracker)
         
         smoothing_factor = -50
         avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
         avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
         avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
+
+        episode_actions.append(joint_actions)
     
     res = ResultObj()
     res.episode_rewards = np.array(episode_rewards)
@@ -183,6 +219,22 @@ def run_marl(MARLAgent,
     res.losses_eps = np.array(losses_eps)
     res.losses_nash = np.array(losses_nash)
     res.sna_policy_dict_iter = sna_policy_dict_iter
+    res.mdp_env = marketEnv
+    res.state_tracker = np.array(state_tracker_epoch)
+    res.episode_actions = np.array(episode_actions)
+
+    marl_params = {
+        "epochs": epochs,
+        "explore_epsilon": explore_epsilon,
+        "max_steps": max_steps,
+        "sync_freq": sync_freq,
+        "mem_size": MEM_SIZE,
+        "turbo_max_evals": TURBO_MAX_EVALS,
+        "turbo_batch_size": TURBO_MAX_EVALS,
+        "turbo_n_init": TURBO_MAX_EVALS,
+        "batch_size": BATCH_SIZE
+    }
+    res.marl_params = marl_params
 
     return res
 

@@ -2,7 +2,7 @@ import numpy as np
 import copy
 from opt.value_estimator import *
 from common.properties import *
-
+from turbo.turbo_1 import Turbo1
 
 def temp_func(k, k_max, const = 3.0):
     return const * np.exp(1 - ((k+1)/k_max))
@@ -63,9 +63,10 @@ def perturb_policy(policy_dic, st_dev = 0.03):
     
     return policy_dic
 
+
 def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q_network_input = None):
     sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
-    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter)
+    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter, q_network_input = q_network_input)
     value_cur_policy = value_initial_policy
     epsilon = np.ones(env.state_space_size)*np.Inf
     for k in range(k_max):
@@ -78,8 +79,8 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q
             for n in range(env.n_agents):
                 pol_dic = perturb_policy(sna_policy_dict_iter[state_key][n])
                 sna_policy_dict_candidate[state_key][n] = copy.deepcopy(pol_dic)
-    
-        value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate, q_network = q_network_input)
+        
+        value_candidate_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_candidate, q_network_input = q_network_input)
 
         if accept_prob(value_cur_policy, value_candidate_policy, T) > np.random.uniform(0, 1):
             sna_policy_dict_iter = sna_policy_dict_candidate
@@ -87,3 +88,11 @@ def sim_anneal_optimize(env, sna_policy_dict, k_max = K_MAX_SA, q_func = None, q
         # potentially add early termination
     
     return epsilon, value_cur_policy, sna_policy_dict_iter
+
+
+
+def get_policydict_from_flatrep():
+    return 1
+
+def create_state_from_numeric_index():
+    return 1
