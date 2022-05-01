@@ -10,6 +10,8 @@ from dqn.dqn_net import DQNNet
 from common.hash_functions import *
 from opt.bbo_sim_anneal import *
 from opt.bbo_tro import *
+import time
+
 # from dataclasses import dataclass
 
 class ResultObj:
@@ -78,8 +80,17 @@ def run_marl(MARLAgent,
     state1_ = marketEnv.reset()
 
     state_tracker_epoch = []
+
+    start_time = time.time()
+    last_time = start_time
+
     for i in range(epochs):
+        
         print("#### Epoch Number: " + str(i))
+        cur_time = time.time()
+        print("Time from begining: " + str(cur_time - start_time))
+        print("Time per Epoch: " + str(cur_time - last_time))
+        last_time = cur_time 
         
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         status = 1
