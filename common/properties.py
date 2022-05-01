@@ -7,36 +7,38 @@ import copy
 from common.RangeMap import *
 import yaml
 
+with open("config/config_file.yaml", "r") as ymlfile:
+    cfg = yaml.safe_load(ymlfile)
+
 if torch.cuda.is_available():
     devid = torch.device('cuda:0')
 else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-BATCH_SIZE = 3
+BATCH_SIZE = cfg['dqn_params']['batch_size']
 
 # DQN Iterative Parameters
-EPOCHS = 100
-SYNC_FREQ = 2
-EXPLORE_EPSILON = 0.05
-MAX_STEPS = 20
+EPOCHS = cfg['dqn_params']['epochs']
+SYNC_FREQ = cfg['dqn_params']['sync_freq']
+EXPLORE_EPSILON = cfg['dqn_params']['explore_epsilon']
+MAX_STEPS = cfg['dqn_params']['max_steps']
 
-MEM_SIZE = 101333
+MEM_SIZE = cfg['dqn_params']['mem_size']
 replay = deque(maxlen = MEM_SIZE)
 
-# DQN Parameters
-HIDDEN_SIZE = 75
-GAMMA = 0.8
+HIDDEN_SIZE = cfg['dqn_params']['hidden_size']
+GAMMA = cfg['dqn_params']['gamma']
 DEFAULT_LOSS_FUNC = torch.nn.HuberLoss()
-LEARNING_RATE = 1e-3
+LEARNING_RATE = cfg['dqn_params']['learning_rate']
 
 # MDP Parameters
-ACTION_DIM = 10
-STATE_DIM = 2
-N_AGENTS = 3
+ACTION_DIM = cfg['mdp_params']['action_dim']
+STATE_DIM = cfg['mdp_params']['state_dim']
+N_AGENTS = cfg['mdp_params']['n_agents']
 
 # MARKET PARAMETERS
-MAX_DEMAND = 3
+MAX_DEMAND = cfg['market_params']['max_demand']
 
 range_dict = {
     (0, 1): 0.10,
@@ -54,15 +56,15 @@ range_dict = {
 neutral_policy_dic = RangeMapDict(range_dict)
 
 # SA PARAMETERS
-K_MAX_SA = 21
+K_MAX_SA = cfg['sa_params']['k_max']
 
 # MC PARAMETERS
-MC_MAX_ITER = 99
+MC_MAX_ITER = cfg['mc_params']['mc_max_iter']
 
 # TURBO TRO PARAMETERS
-TURBO_MAX_EVALS = 5
-TURBO_BATCH_SIZE = 2
-TURBO_N_INIT = 2
+TURBO_MAX_EVALS = cfg['turbo_prams']['max_evals']
+TURBO_BATCH_SIZE = cfg['turbo_prams']['batch_size']
+TURBO_N_INIT = cfg['turbo_prams']['n_init']
 
 # Epsilon net minimization
-EPSNET_OPTIM_STEPS = 15
+EPSNET_OPTIM_STEPS = cfg['eps_net_params']['optim_steps']
