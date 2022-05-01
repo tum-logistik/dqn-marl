@@ -16,7 +16,7 @@ class MARLAgent(DQNNet):
 
     def __init__(self, env):
         self.n_visit_dic = dict()
-        self.s_trans_prob = dict()
+        # self.s_trans_prob = dict()
         self.n_agents = env.n_agents
         self.action_size = env.action_size
         self.state_dim = self.n_agents + 1
@@ -29,10 +29,10 @@ class MARLAgent(DQNNet):
         for s in env.state_space:
             self.n_visit_dic[repr(s)] = 0 
 
-        for s in env.state_space:
-            for a in self.joint_action_space:
-                for s2 in env.state_space:    
-                    self.s_trans_prob[repr([s, a, s2])] = 1 / env.state_space_size
+        # for s in env.state_space:
+        #     for a in self.joint_action_space:
+        #         for s2 in env.state_space:    
+        #             self.s_trans_prob[repr([s, a, s2])] = 1 / env.state_space_size
         
         super(MARLAgent, self).__init__(env.state_env_dim, 
             np.power(self.action_size, self.n_agents), 
@@ -65,15 +65,15 @@ class MARLAgent(DQNNet):
         return norm_police_slice
 
         
-    def prob_state_trans(self, s, a, s_next):
-        # 1 / |s| (to start)... update to: prob_state_trans() + (1 - prob_state_trans() )/(Num. visit_counter[s][a])
-        return self.s_trans_prob[repr([s, a, s_next])]
+    # def prob_state_trans(self, s, a, s_next):
+    #     # 1 / |s| (to start)... update to: prob_state_trans() + (1 - prob_state_trans() )/(Num. visit_counter[s][a])
+    #     return self.s_trans_prob[repr([s, a, s_next])]
     
-    def marl_prob_sas_update(self, s, a, s_next):
-        old_psas = self.s_trans_prob[repr([s, a, s_next])]
-        self.s_trans_prob[repr([s, a, s_next])] = old_psas + (1 - old_psas)/self.n_visit_dic[repr([s, a, s_next])]
-        self.n_visit_dic[repr([s, a, s_next])] = self.n_visit_dic[repr([s, a, s_next])] + 1
-        return self.s_trans_prob[repr([s, a, s_next])] 
+    # def marl_prob_sas_update(self, s, a, s_next):
+    #     old_psas = self.s_trans_prob[repr([s, a, s_next])]
+    #     self.s_trans_prob[repr([s, a, s_next])] = old_psas + (1 - old_psas)/self.n_visit_dic[repr([s, a, s_next])]
+    #     self.n_visit_dic[repr([s, a, s_next])] = self.n_visit_dic[repr([s, a, s_next])] + 1
+    #     return self.s_trans_prob[repr([s, a, s_next])] 
 
     def state_q(self, s, n_agent):
         # sum over action space prob_action(s) * Q(s, a)
