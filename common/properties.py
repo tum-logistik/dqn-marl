@@ -39,6 +39,10 @@ N_AGENTS = cfg['mdp_params']['n_agents']
 
 # MARKET PARAMETERS
 MAX_DEMAND = cfg['market_params']['max_demand']
+BETA_0 = cfg['market_params']['beta0']
+BETA_1 = cfg['market_params']['beta1']
+BETA_2 = cfg['market_params']['beta2']
+MARKET_A = cfg['market_params']['a']
 
 range_dict = {
     (0, 1): 0.10,

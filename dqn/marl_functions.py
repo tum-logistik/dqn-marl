@@ -27,6 +27,7 @@ class ResultObj:
     marl_params: dict
     state_tracker: np.array
     episode_actions: np.array
+    config_params: any
 
 def build_one_hot(n, size):
     arr = np.zeros(size)
@@ -234,7 +235,13 @@ def run_marl(MARLAgent,
         "turbo_n_init": TURBO_MAX_EVALS,
         "batch_size": BATCH_SIZE
     }
+
+    config_params = {
+        "config_params": cfg
+    }
+
     res.marl_params = marl_params
+    res.config_params = config_params
 
     return res
 

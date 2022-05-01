@@ -5,11 +5,16 @@ from dqn.marl_agent import *
 from environment.MarketEnv import *
 import pickle as pkl
 from datetime import datetime
+from common.properties import *
 
 env = MarketEnv(action_size = ACTION_DIM, 
                     n_agents = N_AGENTS, 
                     max_inventory = 0, 
-                    max_demand = MAX_DEMAND)
+                    max_demand = MAX_DEMAND,
+                    beta0 = BETA_0,
+                    beta1 = BETA_1, 
+                    beta2 = BETA_2, 
+                    a = MARKET_A)
 
 marl_agent = MARLAgent(env)
 epochs_input = EPOCHS
