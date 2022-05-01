@@ -5,6 +5,7 @@ import random
 from collections import deque
 import copy
 from common.RangeMap import *
+import yaml
 
 if torch.cuda.is_available():
     devid = torch.device('cuda:0')
@@ -12,18 +13,12 @@ else:
     devid = torch.device('cpu')
 
 # Shared Parameters
-# BATCH_SIZE = 15
 BATCH_SIZE = 3
 
 # DQN Iterative Parameters
-# EPOCHS = 100
 EPOCHS = 100
-
-# SYNC_FREQ = 20
 SYNC_FREQ = 2
-
 EXPLORE_EPSILON = 0.05
-# MAX_STEPS = 40
 MAX_STEPS = 20
 
 MEM_SIZE = 101333
