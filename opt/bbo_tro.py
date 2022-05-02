@@ -31,7 +31,10 @@ class NashPolEstimator:
     def __call__(self, perc_array):
         perc_tens = torch.from_numpy(perc_array).float().to(device = devid)
         eps_vec = self.eps_network(perc_tens)
-        eps = eps_vec[int(self.state_index)]
+        if int(self.state_index) < len(eps_vec):
+            eps = eps_vec[int(self.state_index)]
+        else:
+            eps = eps_vec[-1]
         if self.goal_maximize:
             return -eps.cpu().detach().numpy()
         else:
@@ -153,10 +156,10 @@ def turbo_optimize_eps(env, sna_policy_dict, q_network):
 
 def turbo_optimize_nash_pol(joint_policy_arr, eps_net, state_rep):
     
-    joint_policy_arr_iter = copy.deepcopy(joint_policy_arr)
+    # joint_policy_arr_iter = copy.deepcopy(joint_policy_arr)
     nashPolEst = NashPolEstimator(eps_net, joint_policy_arr, state_rep)
     # flat_sna_policy_dict_candidate = nqe.get_flattened_policy_dict(sna_policy_dict_iter)
-    value = nashPolEst(joint_policy_arr_iter)
+    # value = nashPolEst(joint_policy_arr_iter)
     devid_turbo = "cuda" if torch.cuda.is_available() else "cpu"
 
     turbo1 = Turbo1(
