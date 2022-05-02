@@ -130,7 +130,7 @@ def turbo_optimize_eps(env, sna_policy_dict, q_network):
         batch_size = TURBO_BATCH_SIZE,  # How large batch size TuRBO uses
         verbose=True,  # Print information from each batch
         use_ard=True,  # Set to true if you want to use ARD for the GP kernel
-        max_cholesky_size = 2000,  # When we switch from Cholesky to Lanczos
+        max_cholesky_size = 200,  # When we switch from Cholesky to Lanczos
         n_training_steps = 50,  # Number of steps of ADAM to learn the hypers
         min_cuda = 1024,  # Run on the CPU for small datasets
         device=devid_turbo,  # "cpu" or "cuda"
