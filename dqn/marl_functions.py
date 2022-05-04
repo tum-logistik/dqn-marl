@@ -204,7 +204,7 @@ def run_marl(MARLAgent,
 
                 state_tracker_epoch.append(state_tracker)
         
-        smoothing_factor = -50
+        smoothing_factor = -10
         avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
         avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
         avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
