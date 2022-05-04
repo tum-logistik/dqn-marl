@@ -70,3 +70,4 @@ Sandbox
 .idea
 **/.DS_Store
 
+config/config_file.yaml
