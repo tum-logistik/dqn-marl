@@ -212,7 +212,9 @@ def run_marl(MARLAgent,
         episode_actions.append(joint_actions)
     
     res = ResultObj()
+    
     res.episode_rewards = np.array(episode_rewards)
+    
     res.avg_epoch_rewards = np.array(avg_epoch_rewards)
     res.avg_epoch_rewards_sum = np.array(avg_epoch_rewards_sum)
     res.avg_epoch_rewards_agent = np.array(avg_epoch_rewards_agent)
