@@ -132,7 +132,7 @@ class MarketEnv():
             actionable_actions = np.ones(self.n_agents) # available inventory
             inventory_limit = 0
         
-        rewards = np.multiply(actionable_actions, action_values+1)
+        rewards = np.multiply(auction_counts, action_values)
         new_ref_price = np.mean(action_values+1)
         self.current_state[-1] = new_ref_price
         next_state = self.current_state
