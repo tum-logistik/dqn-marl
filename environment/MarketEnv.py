@@ -89,9 +89,18 @@ class MarketEnv():
         set_price = self.current_state[-1]
         y_intercept = -self.beta2 * set_price
 
-        demand_lambda = 0
+
+        ref_price = self.current_state[-1]
+        demand_lambdas = np.zeros(self.n_agents)
+        joint_demands = np.zeros(self.n_agents)
         for a in range(self.n_agents):
-            demand_lambda += y_intercept - self.demand_slope*self.action_space[int(action_indices[a])]
+            # demand_lambda += y_intercept - self.demand_slope*self.action_space[int(action_indices[a])]
+            agent_price = self.action_space[int(action_indices[a])]
+            demand = self.beta0 + self.beta1 * agent_price + self.beta2 * (agent_price - ref_price)
+            demand_lambdas[a] = np.max([demand, 0])
+            joint_demands[a] = np.floor(np.random.poisson(demand_lambdas[a]))
+        
+        demand_lambda = np.sum(joint_demands)
 
         clipped_lambda = np.max([demand_lambda, 0])
         demand = np.floor(np.random.poisson(clipped_lambda))        
@@ -147,6 +156,8 @@ class MarketEnv():
         agent_ids = np.arange(0, len(agent_actions))
         auction_win_agent = np.zeros(len(agent_actions))
 
+        # for d in range(len(demands)):
+        # for a in range(len(agent_actions)):
         for d in range(int(demand)):
             vi = np.random.choice(agent_ids, 1, p=win_probs, replace=False)
             auction_win_agent[vi] += 1
