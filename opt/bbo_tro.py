@@ -9,7 +9,7 @@ class NashPolEstimator:
     def __init__(self, eps_network, joint_policy_arr, state_of_interest,
                 max_iter = MC_MAX_ITER, 
                 dim = None, 
-                n_agents = 3,
+                n_agents = N_AGENTS,
                 action_dim = 10, 
                 goal_maximize = False): 
         
