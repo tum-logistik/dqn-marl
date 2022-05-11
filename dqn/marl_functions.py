@@ -55,16 +55,15 @@ def run_marl(MARLAgent,
     episode_rewards = []
     episode_rewards_sum = []
     episode_rewards_agent = []
-
     avg_epoch_rewards = []
     avg_epoch_rewards_sum = []
     avg_epoch_rewards_agent = []
-
     episode_actions = []
 
     losses = []
     losses_eps = []
     losses_nash = []
+    
     j = 0
 
     # s -> n -> a
@@ -79,7 +78,6 @@ def run_marl(MARLAgent,
         sna_policy_dict[key] = copy.deepcopy(na_policy_dict)
 
     state1_ = marketEnv.reset()
-
     state_tracker_epoch = []
 
     start_time = time.time()

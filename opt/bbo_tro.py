@@ -74,7 +74,7 @@ class NashEpsilonstimator:
     
     def get_flattened_policy_dict(self, sna_policy_dict_candidate):
         perc_list = []
-        states = sna_policy_dict_candidate.keys()
+        # states = sna_policy_dict_candidate.keys()
         for state in sna_policy_dict_candidate.values():
             for ranges in state.values():
                 range_dic = ranges.range_dic

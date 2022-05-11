@@ -52,10 +52,10 @@ class MARLAgent(DQNNet):
         nash_pol = self.nash_policy_model(s)
 
         if not torch.cuda.is_available():
-            qval_np = q_values.data.numpy()
+            # qval_np = q_values.data.numpy()
             nash_pol_np = nash_pol.data.numpy()
         else:
-            qval_np = q_values.data.cpu().numpy()
+            # qval_np = q_values.data.cpu().numpy()
             nash_pol_np = nash_pol.data.cpu().numpy()
         
         index = n_agent * self.action_size
