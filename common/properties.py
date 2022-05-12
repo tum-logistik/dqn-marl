@@ -72,3 +72,5 @@ TURBO_N_INIT = copy.deepcopy(cfg['turbo_prams']['n_init'])
 
 # Epsilon net minimization
 EPSNET_OPTIM_STEPS = copy.deepcopy(cfg['eps_net_params']['optim_steps'])
+
+PLOT_SMOOTHING_FACTOR = copy.deepcopy(cfg['plot_params']['smoothing_factor'])
