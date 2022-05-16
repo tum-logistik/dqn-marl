@@ -9,7 +9,7 @@ class NashPolEstimator:
     def __init__(self, eps_network, joint_policy_arr, state_of_interest,
                 max_iter = MC_MAX_ITER, 
                 dim = None, 
-                n_agents = 3,
+                n_agents = N_AGENTS,
                 action_dim = 10, 
                 goal_maximize = False): 
         
@@ -74,7 +74,7 @@ class NashEpsilonstimator:
     
     def get_flattened_policy_dict(self, sna_policy_dict_candidate):
         perc_list = []
-        states = sna_policy_dict_candidate.keys()
+        # states = sna_policy_dict_candidate.keys()
         for state in sna_policy_dict_candidate.values():
             for ranges in state.values():
                 range_dic = ranges.range_dic
