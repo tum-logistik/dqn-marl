@@ -37,7 +37,7 @@ def build_one_hot(n, size):
 
 def run_marl(MARLAgent, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
-            epochs = EPOCHS, 
+            episodes = episodes, 
             batch_size = BATCH_SIZE,
             max_steps = MAX_STEPS,
             sync_freq = SYNC_FREQ,
@@ -86,7 +86,7 @@ def run_marl(MARLAgent,
     start_time = time.time()
     last_time = start_time
 
-    for i in range(epochs):
+    for i in range(episodes):
         
         print("#### Epoch Number: " + str(i))
         cur_time = time.time()
@@ -233,7 +233,7 @@ def run_marl(MARLAgent,
     res.avg_epoch_rewards_all_agents = np.array(avg_epoch_rewards_all_agents)
 
     marl_params = {
-        "epochs": epochs,
+        "episodes": episodes,
         "explore_epsilon": explore_epsilon,
         "max_steps": max_steps,
         "sync_freq": sync_freq,

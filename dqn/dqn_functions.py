@@ -14,7 +14,7 @@ DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
 def run_dqn(DQNModel, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
-            epochs = EPOCHS, 
+            episodes = episodes, 
             batch_size = BATCH_SIZE,
             max_steps = MAX_STEPS,
             sync_freq = SYNC_FREQ,
@@ -28,7 +28,7 @@ def run_dqn(DQNModel,
     losses = []
     j = 0
 
-    for i in range(epochs):
+    for i in range(episodes):
         state1_ = marketEnv.reset()
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         
@@ -98,13 +98,13 @@ def run_dqn(DQNModel,
 
 def run_dqn_eval(DQNModel, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
-            epochs = EPOCHS, 
+            episodes = episodes, 
             max_steps = MAX_STEPS):
     
     episode_rewards = []
     avg_epoch_rewards = []
 
-    for i in range(epochs):
+    for i in range(episodes):
         state1_ = marketEnv.reset()
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         

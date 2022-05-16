@@ -17,12 +17,12 @@ env = MarketEnv(action_size = ACTION_DIM,
                     a = MARKET_A)
 
 marl_agent = MARLAgent(env)
-epochs_input = EPOCHS
+episodes_input = episodes
 
 res = run_marl(marl_agent, 
                 marketEnv = env,
                 batch_size = BATCH_SIZE,
-                epochs = epochs_input,
+                episodes = episodes_input,
                 explore_epsilon = EXPLORE_EPSILON,
                 max_steps = MAX_STEPS,
                 sync_freq = SYNC_FREQ,
@@ -30,7 +30,7 @@ res = run_marl(marl_agent,
 
 now = datetime.now()
 date_time = now.strftime("%m-%d-%Y-%H-%M-%S")
-env_id = "market-marl-nash-3-" + date_time + str(epochs_input)
+env_id = "market-marl-nash-3-" + date_time + str(episodes_input)
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, res.losses)
 np.savetxt("./output/%s_dqn_epoch_rewards.txt"%env_id, res.avg_epoch_rewards)
 
@@ -56,7 +56,7 @@ plt.figure(figsize=(10,7))
 plt.plot(res.avg_epoch_rewards)
 # plt.plot(global_rewards)
 plt.plot(res.avg_epoch_rewards_agent)
-plt.xlabel("Epochs",fontsize=22)
+plt.xlabel("Episodes",fontsize=22)
 plt.ylabel("Avg Reward",fontsize=22)
 plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
 
@@ -66,7 +66,7 @@ torch.save(marl_agent, "./output/%s_dqn_model"%env_id)
 # plt.figure(figsize=(10,7))
 # plt.plot(epoch_rewards)
 # plt.plot(epoch_rewards_eval)
-# plt.xlabel("Epochs",fontsize=22)
+# plt.xlabel("Episodes",fontsize=22)
 # plt.ylabel("Avg Reward",fontsize=22)
 # plt.savefig("./output/%s_dqn_avg_reward.png"%env_id)
 
