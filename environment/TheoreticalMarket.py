@@ -42,7 +42,6 @@ class TheoreticalMarket():
     def get_c1(self, x):
         return (self.gamma / self.demand_func(x)) - (1 / x)
         
-    
     def get_c2(self, x):
         return self.gamma / (self.demand_func(x) * x )
     

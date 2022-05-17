@@ -16,10 +16,10 @@ import time
 
 class ResultObj:
     episode_rewards: np.array
-    avg_epoch_rewards: np.array
-    avg_epoch_rewards_sum: np.array
-    avg_epoch_rewards_agent: np.array
-    avg_epoch_rewards_all_agents: np.array
+    avg_episode_rewards: np.array
+    avg_episode_rewards_sum: np.array
+    avg_episode_rewards_agent: np.array
+    avg_episode_rewards_all_agents: np.array
     losses: np.array
     losses_eps: np.array
     losses_nash: np.array
@@ -57,11 +57,11 @@ def run_marl(MARLAgent,
     episode_rewards_sum = []
     episode_rewards_agent = []
     episode_rewards_all_agents = []
-    avg_epoch_rewards = []
-    avg_epoch_rewards_sum = []
-    avg_epoch_rewards_agent = []
+    avg_episode_rewards = []
+    avg_episode_rewards_sum = []
+    avg_episode_rewards_agent = []
     episode_actions = []
-    avg_epoch_rewards_all_agents = []
+    avg_episode_rewards_all_agents = []
 
     losses = []
     losses_eps = []
@@ -88,10 +88,10 @@ def run_marl(MARLAgent,
 
     for i in range(episodes):
         
-        print("#### Epoch Number: " + str(i))
+        print("#### Episode Number: " + str(i))
         cur_time = time.time()
         print("Time from begining: " + str(cur_time - start_time))
-        print("Time per Epoch: " + str(cur_time - last_time))
+        print("Time per Episode: " + str(cur_time - last_time))
         last_time = cur_time 
         
         state1 = torch.from_numpy(state1_).float().to(device = devid)
@@ -209,10 +209,10 @@ def run_marl(MARLAgent,
                 state_tracker_epoch.append(state_tracker)
         
         smoothing_factor = PLOT_SMOOTHING_FACTOR
-        avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
-        avg_epoch_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
-        avg_epoch_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
-        avg_epoch_rewards_all_agents.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
+        avg_episode_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
+        avg_episode_rewards_sum.append(np.mean(np.array(episode_rewards_sum)[smoothing_factor:]))
+        avg_episode_rewards_agent.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
+        avg_episode_rewards_all_agents.append(np.mean(np.array(episode_rewards_agent)[smoothing_factor:]))
 
         episode_actions.append(joint_actions)
     
@@ -220,9 +220,9 @@ def run_marl(MARLAgent,
     
     res.episode_rewards = np.array(episode_rewards)
     
-    res.avg_epoch_rewards = np.array(avg_epoch_rewards)
-    res.avg_epoch_rewards_sum = np.array(avg_epoch_rewards_sum)
-    res.avg_epoch_rewards_agent = np.array(avg_epoch_rewards_agent)
+    res.avg_episode_rewards = np.array(avg_episode_rewards)
+    res.avg_episode_rewards_sum = np.array(avg_episode_rewards_sum)
+    res.avg_episode_rewards_agent = np.array(avg_episode_rewards_agent)
     res.losses = np.array(losses)
     res.losses_eps = np.array(losses_eps)
     res.losses_nash = np.array(losses_nash)
@@ -230,7 +230,7 @@ def run_marl(MARLAgent,
     res.mdp_env = marketEnv
     res.state_tracker = np.array(state_tracker_epoch)
     res.episode_actions = np.array(episode_actions)
-    res.avg_epoch_rewards_all_agents = np.array(avg_epoch_rewards_all_agents)
+    res.avg_episode_rewards_all_agents = np.array(avg_episode_rewards_all_agents)
 
     marl_params = {
         "episodes": episodes,

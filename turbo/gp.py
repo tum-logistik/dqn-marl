@@ -11,6 +11,7 @@ from gpytorch.means import ConstantMean
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from gpytorch.models import ExactGP
 
+# Code from https://github.com/uber-research/TuRBO
 
 # GP Model
 class GP(ExactGP):
