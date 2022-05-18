@@ -22,7 +22,7 @@ losses = []
 loss_fn = DEFAULT_LOSS_FUNC
 explore_epsilon = EXPLORE_EPSILON
 
-for i in range(EPOCHS):
+for i in range(episodes):
     game = Gridworld(size=4, mode='random') # GW
     rendered_game_boad_1 = game.board.render_np()
     state1_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0

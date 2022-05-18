@@ -14,7 +14,7 @@ DQNModel = DQNNet(state_dim = STATE_DIM, output_size = ACTION_DIM)
 
 def run_dqn(DQNModel, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
-            epochs = EPOCHS, 
+            episodes = episodes, 
             batch_size = BATCH_SIZE,
             max_steps = MAX_STEPS,
             sync_freq = SYNC_FREQ,
@@ -23,15 +23,14 @@ def run_dqn(DQNModel,
     target_net = copy.deepcopy(DQNModel.model)
     target_net.load_state_dict(DQNModel.model.state_dict())
 
-    episode_rewards = []
-    avg_epoch_rewards = []
+    episode_rewards = [] 
+    average_episode_rewards = []
     losses = []
     j = 0
 
-    for i in range(epochs):
+    for i in range(episodes):
         state1_ = marketEnv.reset()
         state1 = torch.from_numpy(state1_).float().to(device = devid)
-        
         status = 1
         mov = 0
         rewards = []
@@ -39,7 +38,6 @@ def run_dqn(DQNModel,
         while(status == 1): 
             j+=1
             mov += 1
-            
             qval = DQNModel(state1)
             
             if not torch.cuda.is_available():
@@ -61,7 +59,6 @@ def run_dqn(DQNModel,
             
             replay.append(exp)
             state1 = state2
-            
             rewards.append(reward)
             
             # print out
@@ -84,27 +81,25 @@ def run_dqn(DQNModel,
                     target_net.load_state_dict(DQNModel.model.state_dict())
 
             if done or mov > max_steps:
-                
                 avg_episode_reward = np.mean(np.array(rewards))
                 clear_output(wait=True)
                 episode_rewards.append(avg_episode_reward)
                 status = 0
                 mov = 0
                 
-        avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[-50:] ))
+        average_episode_rewards.append(np.mean(np.array(episode_rewards)[-50:] ))
     
-    return np.array(losses), np.array(episode_rewards), np.array(avg_epoch_rewards)
-
+    return np.array(losses), np.array(episode_rewards), np.array(average_episode_rewards)
 
 def run_dqn_eval(DQNModel, 
             marketEnv = MarketEnv(action_size = ACTION_DIM), 
-            epochs = EPOCHS, 
+            episodes = episodes, 
             max_steps = MAX_STEPS):
     
     episode_rewards = []
-    avg_epoch_rewards = []
+    average_episode_rewards = []
 
-    for i in range(epochs):
+    for i in range(episodes):
         state1_ = marketEnv.reset()
         state1 = torch.from_numpy(state1_).float().to(device = devid)
         
@@ -114,7 +109,6 @@ def run_dqn_eval(DQNModel,
         
         while(status == 1): 
             mov += 1
-            
             qval = DQNModel(state1)
             
             if not torch.cuda.is_available():
@@ -131,9 +125,8 @@ def run_dqn_eval(DQNModel,
             state2 = torch.from_numpy(state2_).float().to(device = devid)
             exp = (state1, action, reward, None, state2, done)
             
-            replay.append(exp) #H
+            replay.append(exp)
             state1 = state2
-            
             rewards.append(reward)
 
             # print out
@@ -148,9 +141,9 @@ def run_dqn_eval(DQNModel,
                 status = 0
                 mov = 0
                 
-        avg_epoch_rewards.append(np.mean(np.array(episode_rewards)[-50:] ))
+        average_episode_rewards.append(np.mean(np.array(episode_rewards)[-50:] ))
     
-    return np.array(episode_rewards), np.array(avg_epoch_rewards)
+    return np.array(episode_rewards), np.array(average_episode_rewards)
 
 if __name__ == '__main__':
     run_dqn(DQNModel)

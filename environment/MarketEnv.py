@@ -8,7 +8,7 @@ class MarketEnv():
         max_demand = 50, 
         
         n_agents = 1, 
-        max_inventory = 2500, 
+        max_inventory = 2500, # inventory is defunct
         max_belief = 1, 
         beta0 = 25,
         beta1 = -1.1, 

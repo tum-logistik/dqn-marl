@@ -13,7 +13,7 @@ if torch.cuda.is_available():
 else:
     devid = torch.device('cpu')
 
-for i in range(epochs):
+for i in range(episodes):
     game = Gridworld(size=4, mode='random')
     rendered_game_boad_1 = game.board.render_np()
     state1_ = game.board.render_np().reshape(1,64) + np.random.rand(1,64)/100.0
@@ -72,7 +72,7 @@ losses = np.array(losses)
 
 plt.figure(figsize=(10,7))
 plt.plot(losses)
-plt.xlabel("Epochs",fontsize=22)
+plt.xlabel("Episodes",fontsize=22)
 plt.ylabel("Loss",fontsize=22)
 
 max_games = 1000

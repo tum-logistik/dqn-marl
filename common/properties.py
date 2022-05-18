@@ -19,7 +19,7 @@ else:
 BATCH_SIZE = copy.deepcopy(cfg['dqn_params']['batch_size'])
 
 # DQN Iterative Parameters
-EPOCHS = copy.deepcopy(cfg['dqn_params']['epochs'])
+episodes = copy.deepcopy(cfg['dqn_params']['episodes'])
 SYNC_FREQ = copy.deepcopy(cfg['dqn_params']['sync_freq'])
 EXPLORE_EPSILON = copy.deepcopy(cfg['dqn_params']['explore_epsilon'])
 MAX_STEPS = copy.deepcopy(cfg['dqn_params']['max_steps'])

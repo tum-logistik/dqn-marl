@@ -1,4 +1,5 @@
 import numpy as np
+# Code from https://github.com/uber-research/TuRBO
 
 def to_unit_cube(x, lb, ub):
     """Project to [0, 1]^d from hypercube with bounds lb and ub"""

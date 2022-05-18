@@ -11,6 +11,8 @@ from .gp import train_gp
 from .utils import from_unit_cube, latin_hypercube, to_unit_cube
 from common.properties import *
 
+# Code from https://github.com/uber-research/TuRBO
+
 def normalize_by_chunks_3d(arr, chunk_size = ACTION_DIM):
     arr2 = arr.reshape(int(arr.shape[0]), int(arr.shape[1]/chunk_size), int(chunk_size))
     d = arr2.sum(axis=2)

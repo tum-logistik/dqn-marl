@@ -15,7 +15,7 @@ marketEnv1 = MarketEnv(action_size = ACTION_DIM)
 losses, episode_rewards, epoch_rewards = run_dqn(DQNModel, 
                                                  marketEnv = marketEnv1,
                                                  batch_size = BATCH_SIZE,
-                                                 epochs = 4001,
+                                                 episodes = 4001,
                                                  explore_epsilon = 0.2,
                                                  max_steps = 100,
                                                  sync_freq = 10)
@@ -39,7 +39,7 @@ plt.ylabel("Avg Reward",fontsize=22)
 
 episode_rewards_eval, epoch_rewards_eval = run_dqn_eval(DQNModel, 
                                               marketEnv = MarketEnv(action_size = ACTION_DIM), 
-                                              epochs = 4000, 
+                                              episodes = 4000, 
                                               max_steps = MAX_STEPS)
 
 plt.figure(figsize=(10,7))
