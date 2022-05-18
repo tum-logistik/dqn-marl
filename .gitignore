@@ -78,3 +78,6 @@ output/*.pkl
 output/*_model
 
 .vscode/
+
+sim_results/*.pkl
+sim_results/*.txt
