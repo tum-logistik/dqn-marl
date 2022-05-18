@@ -29,8 +29,8 @@ class DQNNet():
                 loss_fn = DEFAULT_LOSS_FUNC,
                 learning_rate = LEARNING_RATE,
                 n_agents = 1,
-                action_space_size = None, 
-                state_space_size = None):
+                action_space_size = ACTION_DIM, 
+                state_space_size = STATE_DIM):
         
         self.model = torch.nn.Sequential(
             torch.nn.Linear(state_dim, hidden_size),
