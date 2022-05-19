@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from environment.Gridworld import Gridworld
 from IPython.display import clear_output
 import random
 from matplotlib import pylab as plt
