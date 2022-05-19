@@ -7,9 +7,6 @@ from tests.test_gw import *
 from common.properties import *
 from dqn.dqn_net import DQNNet
 
-VISIT_COUNTER = dict() # dic of (s, a) -> count
-SAS_PROB_DIC = dict() # dic of (s, a) -> count
-
 ## State representation is a joing state of all inventories... 
 
 class MARLAgent(DQNNet):

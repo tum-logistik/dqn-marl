@@ -81,7 +81,7 @@ def run_marl(MARLAgent,
         sna_policy_dict[key] = copy.deepcopy(na_policy_dict)
 
     state1_ = marketEnv.reset()
-    state_tracker_epoch = []
+    state_tracker_episode = []
 
     start_time = time.time()
     last_time = start_time
@@ -206,7 +206,7 @@ def run_marl(MARLAgent,
                 status = 0
                 mov = 0
 
-                state_tracker_epoch.append(state_tracker)
+                state_tracker_episode.append(state_tracker)
         
         smoothing_factor = PLOT_SMOOTHING_FACTOR
         avg_episode_rewards.append(np.mean(np.array(episode_rewards)[smoothing_factor:]))
@@ -228,7 +228,7 @@ def run_marl(MARLAgent,
     res.losses_nash = np.array(losses_nash)
     res.sna_policy_dict_iter = sna_policy_dict_iter
     res.mdp_env = marketEnv
-    res.state_tracker = np.array(state_tracker_epoch)
+    res.state_tracker = np.array(state_tracker_episode)
     res.episode_actions = np.array(episode_actions)
     res.avg_episode_rewards_all_agents = np.array(avg_episode_rewards_all_agents)
 

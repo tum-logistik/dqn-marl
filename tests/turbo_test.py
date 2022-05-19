@@ -1,3 +1,8 @@
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
 from turbo.turbo_1 import Turbo1
 import numpy as np
 import torch
@@ -8,8 +13,8 @@ import matplotlib.pyplot as plt
 class Levy:
     def __init__(self, dim=10):
         self.dim = dim
-        self.lb = -5 * np.ones(dim)
-        self.ub = 10 * np.ones(dim)
+        self.lb = -50 * np.ones(dim)
+        self.ub = 100 * np.ones(dim)
         
     def __call__(self, x):
         assert len(x) == self.dim
@@ -21,7 +26,7 @@ class Levy:
             (w[self.dim - 1] - 1) ** 2 * (1 + np.sin(2 * np.pi * w[self.dim - 1])**2)
         return val
 
-f = Levy(3240)
+f = Levy(20)
 
 turbo1 = Turbo1(
     f=f,  # Handle to objective function

@@ -1,9 +1,14 @@
+import os, sys
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+
+
 from opt.value_estimator import *
 from environment.MarketEnv import *
 from common.RangeMap import *
 import numpy as np
 from opt.bbo_sim_anneal import *
-
 
 STATE_DIM = 2
 ACTION_DIM = 4
@@ -37,7 +42,4 @@ for s in range(marketEnv.state_space_size):
     key = repr(list(marketEnv.state_space[s]))
     sna_policy_dict[key] = copy.deepcopy(na_policy_dict)
 
-
-
-
-epsilon, value_cur_policy = sim_anneal_optimize(marketEnv, sna_policy_dict)
+epsilon, value_cur_policy, _ = sim_anneal_optimize(marketEnv, sna_policy_dict)

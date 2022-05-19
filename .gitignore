@@ -71,3 +71,13 @@ Sandbox
 **/.DS_Store
 
 config/config_file.yaml
+
+output/*.txt
+output/*.png
+output/*.pkl
+output/*_model
+
+.vscode/
+
+sim_results/*.pkl
+sim_results/*.txt

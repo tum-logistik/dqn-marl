@@ -1,5 +1,7 @@
 from dqn.dqn_functions import * 
 
+# Single agent RL test
+
 STATE_DIM = 2
 ACTION_DIM = 110
 BATCH_SIZE = 200
