@@ -100,6 +100,8 @@ class DQNNet():
                 Q2 = torch.max(q_vals,dim=1)[0]
                 Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * Q2)
                 Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
+                loss_eps = 0
+                loss_nash = 0
             else:
                 # Minimizing solution to Epsilon Net, to get policy
                 # self.nash_eps_net.requires_grad=False

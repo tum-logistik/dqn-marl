@@ -6,6 +6,7 @@ from environment.MarketEnv import *
 import pickle as pkl
 from datetime import datetime
 from common.properties import *
+from dqn.marl_baseline import *
 
 env = MarketEnv(action_size = ACTION_DIM, 
                     n_agents = N_AGENTS, 
@@ -19,7 +20,7 @@ env = MarketEnv(action_size = ACTION_DIM,
 marl_agent = MARLAgent(env)
 episodes_input = episodes
 
-res = run_marl(marl_agent, 
+res = run_marl_baseline(marl_agent, 
                 marketEnv = env,
                 batch_size = BATCH_SIZE,
                 episodes = episodes_input,
@@ -30,7 +31,7 @@ res = run_marl(marl_agent,
 
 now = datetime.now()
 date_time = now.strftime("%m-%d-%Y-%H-%M-%S")
-env_id = "market-marl-nash-3-" + date_time + str(episodes_input)
+env_id = "market-marl-maxq-" + date_time + str(episodes_input)
 np.savetxt("./output/%s_dqn_losses.txt"%env_id, res.losses)
 np.savetxt("./output/%s_dqn_episode_rewards.txt"%env_id, res.avg_episode_rewards)
 

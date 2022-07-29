@@ -166,7 +166,7 @@ def run_marl_baseline(MARLAgent,
                 Q1, Q2, X, Y, loss, loss_eps, loss_nash = MARLAgent.batch_update(minibatch, target_net, MARLAgent.state_dim, no_nash = True)
 
                 print(i, loss.item())
-                print(i, loss_nash.item())
+                # print(i, loss_nash.item())
                 clear_output(wait=True)
                 
                 # Q learning
@@ -175,19 +175,9 @@ def run_marl_baseline(MARLAgent,
                 losses.append(loss.item())
                 MARLAgent.optimizer.step()
 
-                # Eps learning
-                MARLAgent.eps_optimizer.zero_grad()
-                loss_eps.backward(retain_graph=True)
-                losses_eps.append(loss_eps.item())
-                MARLAgent.eps_optimizer.step()
+                
                 
                 if devid == torch.device('cuda:0'): torch.cuda.empty_cache()
-
-                # Nash learning
-                MARLAgent.nash_optimizer.zero_grad()
-                loss_nash.backward(retain_graph=True)
-                losses_nash.append(loss_nash.item())
-                MARLAgent.nash_optimizer.step()
 
                 if j % sync_freq == 0:
                     target_net.load_state_dict(MARLAgent.model.state_dict())
