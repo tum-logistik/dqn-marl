@@ -86,7 +86,7 @@ class DQNNet():
         done_batch = torch.tensor([d for (s1,a,r,e,ep,s2,d) in minibatch]).type(torch.FloatTensor).to(device = devid)
         return state1_batch, action_batch, reward_batch, epsilon_state_batch, nash_policy_batch, state2_batch, done_batch
     
-    def batch_update(self, minibatch, target_net, state_dim, n_agent = 0): # cooperative update MA
+    def batch_update(self, minibatch, target_net, state_dim, n_agent = 0, no_nash = False): # cooperative update MA
         state1_batch, action_batch, reward_batch, epsilon_state_batch, nash_policy_batch, state2_batch, done_batch = self.extract_mini_batch(minibatch, state_dim)
         
         # Q update
@@ -95,57 +95,62 @@ class DQNNet():
             Q2 = target_net(state2_batch).to(device = devid)
         
         if self.n_agents > 1:
+            if no_nash == True:
+                q_vals = self(state1_batch)
+                Q2 = torch.max(q_vals,dim=1)[0]
+                Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * Q2)
+                Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
+            else:
+                # Minimizing solution to Epsilon Net, to get policy
+                # self.nash_eps_net.requires_grad=False
+                # x = torch.nn.Parameter(torch.rand(self.batch_size, self.joint_action_space_size), requires_grad=True)
+                # policy_optim = torch.optim.SGD([x], lr=1e-1)
+                # policy_mse = torch.nn.MSELoss()
+                # zeros_eps = torch.zeros(self.state_space_size).float().to(device = devid)
 
-            # Minimizing solution to Epsilon Net, to get policy
-            # self.nash_eps_net.requires_grad=False
-            # x = torch.nn.Parameter(torch.rand(self.batch_size, self.joint_action_space_size), requires_grad=True)
-            # policy_optim = torch.optim.SGD([x], lr=1e-1)
-            # policy_mse = torch.nn.MSELoss()
-            # zeros_eps = torch.zeros(self.state_space_size).float().to(device = devid)
+                # for _ in range(EPSNET_OPTIM_STEPS):
+                #     loss_eps_pol = policy_mse(self.nash_eps_net(x), zeros_eps)
+                #     loss_eps_pol.backward()
+                #     policy_optim.step()
+                #     policy_optim.zero_grad()
+                
+                ### TURBO for epsmin
 
-            # for _ in range(EPSNET_OPTIM_STEPS):
-            #     loss_eps_pol = policy_mse(self.nash_eps_net(x), zeros_eps)
-            #     loss_eps_pol.backward()
-            #     policy_optim.step()
-            #     policy_optim.zero_grad()
-            
-            ### TURBO for epsmin
+                x_trial = np.ones(int(self.joint_action_space_size))*0.1
+                nash_pol_eps_min_batch = np.zeros([self.batch_size, self.joint_action_space_size])
+                for i in range(nash_pol_eps_min_batch.shape[0]):
+                    state_from_batch = state1_batch[i].cpu().detach().numpy()
+                    _, nash_pol_eps_min_batch[i], _ = turbo_optimize_nash_pol(x_trial, self.nash_eps_net, state_from_batch)
+                nash_pol_eps_min_batch_tens = torch.from_numpy(nash_pol_eps_min_batch).float().to(device = devid)
+                nash_pol_eps_min_batch_tens.requires_grad=True
+                
+                # Nash Policy Net: state -> policy
+                nash_policy_pred = self.nash_policy_model(state1_batch)
+                # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
+                
+                loss_nash = self.loss_fn(nash_pol_eps_min_batch_tens, nash_policy_pred)
+                # loss_nash = self.loss_fn(nash_policy_batch, nash_policy_pred)
 
-            x_trial = np.ones(int(self.joint_action_space_size))*0.1
-            nash_pol_eps_min_batch = np.zeros([self.batch_size, self.joint_action_space_size])
-            for i in range(nash_pol_eps_min_batch.shape[0]):
-                state_from_batch = state1_batch[i].cpu().detach().numpy()
-                _, nash_pol_eps_min_batch[i], _ = turbo_optimize_nash_pol(x_trial, self.nash_eps_net, state_from_batch)
-            nash_pol_eps_min_batch_tens = torch.from_numpy(nash_pol_eps_min_batch).float().to(device = devid)
-            nash_pol_eps_min_batch_tens.requires_grad=True
-            
-            # Nash Policy Net: state -> policy
-            nash_policy_pred = self.nash_policy_model(state1_batch)
-            # zeros_tensor = torch.from_numpy(np.zeros(BATCH_SIZE)).float().to(device = devid)
-            
-            loss_nash = self.loss_fn(nash_pol_eps_min_batch_tens, nash_policy_pred)
-            # loss_nash = self.loss_fn(nash_policy_batch, nash_policy_pred)
+                nash_policy_pred_np = nash_policy_pred.cpu().detach().numpy()
+                nash_policy_pred_nagent_np = nash_policy_pred_np.reshape(int(BATCH_SIZE), int(self.n_agents), int(ACTION_DIM))
 
-            nash_policy_pred_np = nash_policy_pred.cpu().detach().numpy()
-            nash_policy_pred_nagent_np = nash_policy_pred_np.reshape(int(BATCH_SIZE), int(self.n_agents), int(ACTION_DIM))
+                nash_probs = batch_nprob_reform(nash_policy_pred_nagent_np)
+                # indexed_nash_scalar = np.apply_over_axes(np.multiply, nash_probs, 1)
 
-            nash_probs = batch_nprob_reform(nash_policy_pred_nagent_np)
-            # indexed_nash_scalar = np.apply_over_axes(np.multiply, nash_probs, 1)
+                indexed_nash_scalar = np.multiply.reduce(nash_probs, axis=(2))
+                nash_scalar_torch = torch.from_numpy(indexed_nash_scalar).float().to(device = devid)
+                scaled_q_func = nash_scalar_torch * Q2
 
-            indexed_nash_scalar = np.multiply.reduce(nash_probs, axis=(2))
-            nash_scalar_torch = torch.from_numpy(indexed_nash_scalar).float().to(device = devid)
-            scaled_q_func = nash_scalar_torch * Q2
+                # Q Function Net, state -> Nash Q
+                nash_Q2 = torch.max(scaled_q_func,dim=1)[0]
+                Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * nash_Q2)
+                Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
 
-            # Q Function Net, state -> Nash Q
-            nash_Q2 = torch.max(scaled_q_func,dim=1)[0]
-            Q_formula = reward_batch[:, n_agent] + self.gamma * ((1-done_batch[:, n_agent]) * nash_Q2)
-            Q_net = Q1.gather(dim=1, index=action_batch.long().unsqueeze(dim=1)).squeeze()
+                # Epsilon Net: policy -> epsilon, optimize over the epsilon net
+                eps_pred = self.nash_eps_net(nash_policy_pred)
+                epsilon_state_batch.requires_grad=True
+                loss_eps = self.loss_fn(epsilon_state_batch, eps_pred)
 
-            # Epsilon Net: policy -> epsilon, optimize over the epsilon net
-            eps_pred = self.nash_eps_net(nash_policy_pred)
-            epsilon_state_batch.requires_grad=True
-            loss_eps = self.loss_fn(epsilon_state_batch, eps_pred)
-            
         else:
             max_Q2 = torch.max(Q2,dim=1)[0]
             Q_formula = reward_batch + self.gamma * ((1-done_batch) * max_Q2)

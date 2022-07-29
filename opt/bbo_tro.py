@@ -190,3 +190,42 @@ def turbo_optimize_nash_pol(joint_policy_arr, eps_net, state_rep):
     eps_min = eps_net(x_best_tens)
 
     return f_best, x_best, eps_min
+
+def turbo_optimize_max_reward(env, sna_policy_dict, q_network):
+    
+    sna_policy_dict_iter = copy.deepcopy(sna_policy_dict)
+    nqe = NashEpsilonstimator(env, q_network, sna_policy_dict_iter, goal_maximize = True)
+    value_initial_policy, _ = value_search_sample_policy_approx(env, sna_policy_dict_iter, q_network_input = q_network)
+    # flat_sna_policy_dict_candidate = nqe.get_flattened_policy_dict(sna_policy_dict_iter)
+    # value = nqe(flat_sna_policy_dict_candidate)
+    devid_turbo = "cuda" if torch.cuda.is_available() else "cpu"
+
+    turbo1 = Turbo1(
+        f = nqe,  # Handle to objective function
+        lb = nqe.lb,  # Numpy array specifying lower bounds
+        ub = nqe.ub,  # Numpy array specifying upper bounds
+        n_init = TURBO_N_INIT,  # Number of initial bounds from an Latin hypercube design
+        max_evals = TURBO_MAX_EVALS,  # Maximum number of evaluations
+        batch_size = TURBO_BATCH_SIZE,  # How large batch size TuRBO uses
+        verbose=True,  # Print information from each batch
+        use_ard=True,  # Set to true if you want to use ARD for the GP kernel
+        max_cholesky_size = 200,  # When we switch from Cholesky to Lanczos
+        n_training_steps = 50,  # Number of steps of ADAM to learn the hypers
+        min_cuda = 1024,  # Run on the CPU for small datasets
+        device=devid_turbo,  # "cpu" or "cuda"
+        dtype="float64",  # float64 or float32
+    )
+
+    turbo1.optimize()
+    
+    X = turbo1.X  # Evaluated points
+    fX = turbo1.fX  # Observed values
+    ind_best = np.argmin(fX)
+    f_best, x_best = fX[ind_best], X[ind_best, :]
+
+    # retrieve epsilon
+    sna_policy_bbo = nqe.get_sna_policy_dict(x_best)
+    value_vector_bbo, joint_action_vector_bbo = value_search_sample_policy_approx(env, sna_policy_bbo, q_network_input = q_network)
+    epsilon = value_vector_bbo - value_initial_policy
+
+    return epsilon, f_best, x_best, sna_policy_bbo
